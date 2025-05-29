@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { api } from '../services/api'
-import CreatePost from '../components/CreatePost'
 
 export default function Home() {
     const [posts, setPosts] = useState([])
@@ -42,8 +41,6 @@ export default function Home() {
 
     return (
         <div className="max-w-2xl mx-auto px-4 py-6">
-            <CreatePost onPostCreated={fetchPosts} />
-
             {posts.length === 0 ? (
                 <div className="text-center py-10">
                     <p className="text-gray-500">No hay publicaciones aún. ¡Sé el primero en compartir!</p>

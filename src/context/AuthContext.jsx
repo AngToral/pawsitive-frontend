@@ -17,6 +17,15 @@ export function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
 
+    const fetchUserData = async (userId) => {
+        try {
+            const userData = await api.getUser(userId)
+            setUser(userData)
+        } catch (err) {
+            console.error('Error al obtener datos del usuario:', err)
+        }
+    }
+
     useEffect(() => {
         checkAuth()
     }, [])
@@ -24,14 +33,37 @@ export function AuthProvider({ children }) {
     const checkAuth = async () => {
         try {
             const token = localStorage.getItem('token')
-            if (token) {
+            console.log('Token encontrado:', token ? 'Sí' : 'No');
+
+            if (!token) {
+                console.log('No hay token almacenado');
+                setLoading(false);
+                return;
+            }
+
+            try {
                 const decoded = jwtDecode(token)
+                console.log('Token decodificado:', decoded);
+
+                if (!decoded._id) {
+                    console.error('El token no contiene ID de usuario');
+                    localStorage.removeItem('token');
+                    setLoading(false);
+                    return;
+                }
+
                 // Verificar si el token ha expirado
-                if (decoded.exp * 1000 > Date.now()) {
-                    setUser(decoded)
+                if (decoded.exp && decoded.exp * 1000 > Date.now()) {
+                    console.log('Token válido, obteniendo datos del usuario con ID:', decoded._id);
+                    // Obtener la información completa del usuario
+                    await fetchUserData(decoded._id)
                 } else {
+                    console.log('Token expirado');
                     localStorage.removeItem('token')
                 }
+            } catch (decodeError) {
+                console.error('Error al decodificar el token:', decodeError);
+                localStorage.removeItem('token');
             }
         } catch (err) {
             console.error('Error al verificar autenticación:', err)
@@ -44,12 +76,38 @@ export function AuthProvider({ children }) {
     const login = async (email, password) => {
         setError(null)
         try {
-            const token = await api.login(email, password)
-            localStorage.setItem('token', token)
-            const decoded = jwtDecode(token)
-            setUser(decoded)
-            return true
+            const response = await api.login(email, password)
+            console.log('Respuesta del login:', response);
+
+            if (!response || !response.token) {
+                throw new Error('La respuesta del servidor no incluye el token');
+            }
+
+            localStorage.setItem('token', response.token)
+
+            try {
+                const decoded = jwtDecode(response.token)
+                console.log('Token decodificado:', decoded);
+
+                if (!decoded._id) {
+                    throw new Error('El token no contiene el ID del usuario');
+                }
+
+                // Establecer el usuario directamente desde la respuesta
+                if (response.user) {
+                    setUser(response.user);
+                } else {
+                    // Si por alguna razón no viene el usuario en la respuesta, lo obtenemos
+                    await fetchUserData(decoded._id);
+                }
+
+                return true
+            } catch (decodeError) {
+                console.error('Error al decodificar el token:', decodeError);
+                throw new Error('Error al procesar el token de autenticación');
+            }
         } catch (err) {
+            console.error('Error completo del login:', err);
             setError(err.message)
             return false
         }
@@ -69,8 +127,12 @@ export function AuthProvider({ children }) {
 
     const logout = async () => {
         try {
-            localStorage.removeItem('token')
+            // Limpiar todo el localStorage
+            localStorage.clear()
+            // Limpiar el estado del usuario
             setUser(null)
+            // Forzar recarga de la página para limpiar cualquier caché
+            window.location.reload()
             return true
         } catch (err) {
             setError(err.message)

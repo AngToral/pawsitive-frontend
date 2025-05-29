@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../services/api'
+import { HiPhoto, HiUser } from 'react-icons/hi2'
 
 export default function CreatePost({ onPostCreated }) {
     const [caption, setCaption] = useState('')
@@ -54,36 +55,42 @@ export default function CreatePost({ onPostCreated }) {
     }
 
     return (
-        <div className="bg-white rounded-lg shadow p-4 mb-4">
-            <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="max-w-2xl mx-auto">
+            <form onSubmit={handleSubmit} className="space-y-6">
                 {error && (
                     <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg p-3 text-sm">
                         {error}
                     </div>
                 )}
 
-                <div className="flex items-start space-x-3">
-                    <img
-                        src={user?.profilePicture || 'https://via.placeholder.com/40'}
-                        alt={user?.fullName}
-                        className="w-10 h-10 rounded-full"
-                    />
+                <div className="flex items-start space-x-4">
+                    {user?.profilePicture ? (
+                        <img
+                            src={`${user.profilePicture}?${new Date().getTime()}`}
+                            alt={user?.fullName}
+                            style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }}
+                        />
+                    ) : (
+                        <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                            <HiUser className="w-7 h-7 text-gray-500" />
+                        </div>
+                    )}
                     <textarea
                         value={caption}
                         onChange={(e) => setCaption(e.target.value)}
                         placeholder="¿Qué está haciendo tu mascota?"
-                        className="flex-1 resize-none border rounded-lg p-2 h-20 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        className="flex-1 resize-none border rounded-lg p-4 h-32 text-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     />
                 </div>
 
                 {previewUrls.length > 0 && (
-                    <div className="grid grid-cols-2 gap-2 mt-2">
+                    <div className="grid grid-cols-2 gap-4">
                         {previewUrls.map((url, index) => (
-                            <div key={index} className="relative aspect-square">
+                            <div key={index} className="relative aspect-square rounded-lg overflow-hidden">
                                 <img
                                     src={url}
                                     alt={`Preview ${index + 1}`}
-                                    className="w-full h-full object-cover rounded-lg"
+                                    className="w-full h-full object-cover"
                                 />
                                 <button
                                     type="button"
@@ -94,7 +101,7 @@ export default function CreatePost({ onPostCreated }) {
                                         setPreviewUrls(newUrls)
                                         URL.revokeObjectURL(url)
                                     }}
-                                    className="absolute top-1 right-1 bg-black bg-opacity-50 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-opacity-70"
+                                    className="absolute top-2 right-2 bg-black bg-opacity-50 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-opacity-70"
                                 >
                                     ×
                                 </button>
@@ -103,7 +110,7 @@ export default function CreatePost({ onPostCreated }) {
                     </div>
                 )}
 
-                <div className="flex items-center justify-between pt-3 border-t">
+                <div className="flex items-center justify-between pt-4 border-t">
                     <div className="flex space-x-2">
                         <label className="cursor-pointer">
                             <input
@@ -113,11 +120,9 @@ export default function CreatePost({ onPostCreated }) {
                                 onChange={handleImageChange}
                                 className="hidden"
                             />
-                            <div className="flex items-center space-x-2 text-gray-600 hover:text-primary-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                                </svg>
-                                <span>Fotos</span>
+                            <div className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-primary-500 hover:bg-gray-100 rounded-lg">
+                                <HiPhoto className="w-6 h-6" />
+                                <span>Añadir fotos</span>
                             </div>
                         </label>
                     </div>
@@ -125,7 +130,7 @@ export default function CreatePost({ onPostCreated }) {
                     <button
                         type="submit"
                         disabled={isLoading || (!caption.trim() && images.length === 0)}
-                        className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed text-base font-medium"
                     >
                         {isLoading ? (
                             <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>

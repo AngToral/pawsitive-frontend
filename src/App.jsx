@@ -5,6 +5,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import CreatePostPage from './pages/CreatePost'
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           }
         >
           <Route index element={<Home />} />
+          <Route path="create" element={<CreatePostPage />} />
           {/* Aquí irán más rutas protegidas */}
         </Route>
       </Routes>

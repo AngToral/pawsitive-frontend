@@ -6,19 +6,25 @@ export default function Login() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [isLoading, setIsLoading] = useState(false)
-    const { login, error } = useAuth()
+    const [error, setError] = useState(null)
+    const { login, error: authError } = useAuth()
     const navigate = useNavigate()
 
     const handleSubmit = async (e) => {
         e.preventDefault()
         setIsLoading(true)
-
-        const success = await login(email, password)
-        if (success) {
-            navigate('/')
+        try {
+            console.log('Intentando iniciar sesión con:', email);
+            const success = await login(email, password)
+            if (success) {
+                navigate('/')
+            }
+        } catch (err) {
+            console.error('Error en el formulario de login:', err);
+            setError(err.message || 'Error al iniciar sesión');
+        } finally {
+            setIsLoading(false)
         }
-
-        setIsLoading(false)
     }
 
     return (
@@ -44,15 +50,26 @@ export default function Login() {
 
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                     {error && (
-                        <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg p-4 text-sm">
-                            {error}
+                        <div className="rounded-md bg-red-50 p-4">
+                            <div className="flex">
+                                <div className="flex-shrink-0">
+                                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div className="ml-3">
+                                    <h3 className="text-sm font-medium text-red-800">
+                                        {error}
+                                    </h3>
+                                </div>
+                            </div>
                         </div>
                     )}
 
-                    <div className="rounded-md shadow-sm space-y-4">
+                    <div className="rounded-md shadow-sm -space-y-px">
                         <div>
                             <label htmlFor="email" className="sr-only">
-                                Correo electrónico
+                                Email
                             </label>
                             <input
                                 id="email"
@@ -62,8 +79,8 @@ export default function Login() {
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
-                                placeholder="Correo electrónico"
+                                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-lg focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
+                                placeholder="Email"
                             />
                         </div>
                         <div>
@@ -78,7 +95,7 @@ export default function Login() {
                                 required
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
+                                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-lg focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
                                 placeholder="Contraseña"
                             />
                         </div>
@@ -87,7 +104,7 @@ export default function Login() {
                     <div>
                         <button
                             type="submit"
-                            disabled={isLoading}
+                            disabled={isLoading || !email || !password}
                             className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isLoading ? (
