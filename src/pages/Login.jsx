@@ -7,7 +7,7 @@ export default function Login() {
     const [password, setPassword] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState(null)
-    const { login, error: authError } = useAuth()
+    const { login } = useAuth()
     const navigate = useNavigate()
 
     const handleSubmit = async (e) => {

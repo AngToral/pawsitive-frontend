@@ -1,9 +1,9 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { HiHome, HiMagnifyingGlass, HiPlus, HiBell, HiChatBubbleOvalLeftEllipsis, HiUser } from 'react-icons/hi2'
+import { HiHome, HiMagnifyingGlass, HiPlus, HiBell, HiChatBubbleOvalLeftEllipsis, HiUser, HiArrowRightOnRectangle } from 'react-icons/hi2'
 
 export default function Navbar() {
-    const { user } = useAuth()
+    const { user, logout } = useAuth()
     const location = useLocation()
 
     const menuItems = [
@@ -74,6 +74,14 @@ export default function Navbar() {
                     )}
                     <span className="ml-4">Perfil</span>
                 </Link>
+
+                <button
+                    onClick={logout}
+                    className="flex items-center px-3 py-3 text-base rounded-lg transition-colors hover:bg-gray-100 w-full text-left text-gray-500"
+                >
+                    <HiArrowRightOnRectangle className="w-6 h-6" />
+                    <span className="ml-4">Cerrar sesión</span>
+                </button>
             </div>
         </nav>
     )
