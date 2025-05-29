@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../services/api'
 import { HiPhoto, HiUser } from 'react-icons/hi2'
+import { ThreeDots } from 'react-loader-spinner'
 
 export default function CreatePostPage() {
     const [caption, setCaption] = useState('')
@@ -42,43 +43,31 @@ export default function CreatePostPage() {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        setIsLoading(true)
         setError(null)
 
+        // Validación del formulario
+        if (!caption.trim()) {
+            setError('Por favor, añade una descripción a tu publicación')
+            return
+        }
+
+        setIsLoading(true)
+
         try {
-            if (!caption.trim() && images.length === 0) {
-                throw new Error('Debes añadir un texto o al menos una imagen')
-            }
-
-            if (images.length > 10) {
-                throw new Error('No puedes subir más de 10 imágenes')
-            }
-
-            // Verificar el tamaño de las imágenes
-            const maxSize = 5 * 1024 * 1024; // 5MB
-            const invalidImages = images.filter(img => img.size > maxSize);
-            if (invalidImages.length > 0) {
-                throw new Error('Algunas imágenes son demasiado grandes. El tamaño máximo es 5MB por imagen.')
-            }
-
-            console.log('Enviando post con:', {
-                caption,
-                imagesCount: images.length,
-                imagesSizes: images.map(img => ({
-                    name: img.name,
-                    size: img.size,
-                    type: img.type
-                }))
-            });
-
             await api.createPost({
                 caption,
                 images
             })
+
+            // Limpiar el formulario
+            setCaption('')
+            setImages([])
+            setPreviewUrls([])
+
+            // Notificar al componente padre
             navigate('/')
         } catch (err) {
-            console.error('Error detallado:', err);
-            setError(err.message || 'Ha ocurrido un error al crear el post. Por favor, inténtalo de nuevo.')
+            setError(err.message || 'Ha ocurrido un error al crear el post')
         } finally {
             setIsLoading(false)
         }
@@ -123,29 +112,30 @@ export default function CreatePostPage() {
                     </div>
 
                     {previewUrls.length > 0 && (
-                        <div className="flex flex-wrap gap-2" style={{ maxWidth: '600px' }}>
+                        <div className="flex gap-2" style={{ maxWidth: '1000px' }}>
                             {previewUrls.map((url, index) => (
-                                <div key={index} className="relative rounded-lg border border-gray-200" style={{ width: '100px', height: '100px' }}>
+                                <div key={index} className="flex items-center gap-2 rounded-lg border border-gray-200 group">
                                     <img
                                         src={url}
                                         alt={`Preview ${index + 1}`}
                                         style={{
                                             width: '100px',
                                             height: '100px',
-                                            objectFit: 'contain',
+                                            objectFit: 'cover',
                                             borderRadius: '8px'
                                         }}
                                     />
                                     <button
                                         type="button"
                                         onClick={() => {
-                                            const newImages = images.filter((_, i) => i !== index)
-                                            const newUrls = previewUrls.filter((_, i) => i !== index)
-                                            setImages(newImages)
-                                            setPreviewUrls(newUrls)
-                                            URL.revokeObjectURL(url)
+                                            const newImages = images.filter((_, i) => i !== index);
+                                            const newUrls = previewUrls.filter((_, i) => i !== index);
+                                            setImages(newImages);
+                                            setPreviewUrls(newUrls);
+                                            URL.revokeObjectURL(url);
                                         }}
-                                        className="absolute top-1 right-1 bg-black bg-opacity-50 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-opacity-70 text-sm"
+                                        className="bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors shadow-md text-lg font-bold"
+                                        aria-label="Eliminar imagen"
                                     >
                                         ×
                                     </button>
@@ -174,10 +164,16 @@ export default function CreatePostPage() {
                         <button
                             type="submit"
                             disabled={isLoading || (!caption.trim() && images.length === 0)}
-                            className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed text-base font-medium"
+                            className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed text-base font-medium min-w-[120px] h-[40px] flex items-center justify-center"
                         >
                             {isLoading ? (
-                                <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
+                                <ThreeDots
+                                    height="24"
+                                    width="24"
+                                    radius="9"
+                                    color="#ffffff"
+                                    ariaLabel="loading"
+                                />
                             ) : (
                                 'Publicar'
                             )}
