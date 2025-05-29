@@ -87,7 +87,10 @@ export default function Home() {
                                                     key={index}
                                                     src={imageUrl}
                                                     alt={`Post image ${index + 1}`}
-                                                    className={`w-full ${post.images.length === 1 ? 'h-96' : 'h-40'} object-cover rounded-lg`}
+                                                    className="w-full object-cover rounded-lg"
+                                                    style={{
+                                                        height: post.images.length === 1 ? '256px' : '160px'
+                                                    }}
                                                     onError={(e) => {
                                                         console.error('Error al cargar la imagen:', imageUrl);
                                                         e.target.style.display = 'none';
