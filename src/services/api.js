@@ -92,10 +92,22 @@ export const api = {
 
     // Posts
     async getPosts() {
-        const response = await fetch(`${API_URL}/post`, {
-            headers: getHeaders(),
-        });
-        return handleResponse(response);
+        try {
+            const response = await fetch(`${API_URL}/post`, {
+                headers: getHeaders(),
+            });
+
+            if (!response.ok) {
+                throw new Error('Error al obtener los posts');
+            }
+
+            const data = await response.json();
+            console.log('Respuesta del servidor (getPosts):', data);
+            return data;
+        } catch (error) {
+            console.error('Error en getPosts:', error);
+            throw error;
+        }
     },
 
     async createPost(postData) {

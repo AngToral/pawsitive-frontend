@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react'
 import { api } from '../services/api'
+import { HiUser } from 'react-icons/hi'
+
+const API_URL = import.meta.env.VITE_BACKEND || 'http://localhost:3000'
 
 export default function Home() {
     const [posts, setPosts] = useState([])
@@ -9,8 +12,11 @@ export default function Home() {
     const fetchPosts = async () => {
         try {
             const data = await api.getPosts()
+            console.log('Posts recibidos:', data)
+            console.log('Ejemplo de imágenes del primer post:', JSON.stringify(data[0]?.images, null, 2))
             setPosts(data)
         } catch (err) {
+            console.error('Error al obtener posts:', err)
             setError(err.message)
         } finally {
             setIsLoading(false)
@@ -51,11 +57,17 @@ export default function Home() {
                         <div key={post._id} className="bg-white rounded-lg shadow">
                             <div className="p-4">
                                 <div className="flex items-center space-x-3">
-                                    <img
-                                        src={post.user.profilePicture || 'https://via.placeholder.com/40'}
-                                        alt={post.user.fullName}
-                                        className="w-10 h-10 rounded-full"
-                                    />
+                                    {post.user.profilePicture ? (
+                                        <img
+                                            src={`${post.user.profilePicture}?${new Date().getTime()}`}
+                                            alt={post.user.fullName}
+                                            style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+                                        />
+                                    ) : (
+                                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                                            <HiUser className="w-6 h-6 text-gray-500" />
+                                        </div>
+                                    )}
                                     <div>
                                         <h3 className="font-semibold">{post.user.fullName}</h3>
                                         <p className="text-sm text-gray-500">
@@ -67,15 +79,22 @@ export default function Home() {
                                 <p className="mt-3">{post.caption}</p>
 
                                 {post.images && post.images.length > 0 && (
-                                    <div className="mt-3 grid grid-cols-2 gap-2">
-                                        {post.images.map((image, index) => (
-                                            <img
-                                                key={index}
-                                                src={image}
-                                                alt={`Post image ${index + 1}`}
-                                                className="w-full h-48 object-cover rounded-lg"
-                                            />
-                                        ))}
+                                    <div className={`mt-3 grid gap-2 ${post.images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                                        {post.images.map((image, index) => {
+                                            const imageUrl = image.url;
+                                            return (
+                                                <img
+                                                    key={index}
+                                                    src={imageUrl}
+                                                    alt={`Post image ${index + 1}`}
+                                                    className={`w-full ${post.images.length === 1 ? 'h-96' : 'h-40'} object-cover rounded-lg`}
+                                                    onError={(e) => {
+                                                        console.error('Error al cargar la imagen:', imageUrl);
+                                                        e.target.style.display = 'none';
+                                                    }}
+                                                />
+                                            );
+                                        })}
                                     </div>
                                 )}
 
