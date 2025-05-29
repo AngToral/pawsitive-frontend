@@ -1,4 +1,16 @@
-const API_URL = import.meta.env.VITE_BACKEND;
+const API_URL = import.meta.env.VITE_BACKEND || 'http://localhost:3000';
+
+// Función auxiliar para obtener las cabeceras
+const getHeaders = () => {
+    const headers = {
+        'Content-Type': 'application/json'
+    };
+    const token = localStorage.getItem('token');
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+};
 
 // Función auxiliar para manejar errores
 const handleResponse = async (response) => {
@@ -12,27 +24,25 @@ const handleResponse = async (response) => {
 export const api = {
     // Auth
     async login(email, password) {
-        const response = await fetch(`${API_URL}/auth/login`, {
+        const response = await fetch(`${API_URL}/user/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password }),
-            credentials: 'include',
         });
         return handleResponse(response);
     },
 
     async register(userData) {
-        const response = await fetch(`${API_URL}/auth/register`, {
+        const response = await fetch(`${API_URL}/user/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(userData),
-            credentials: 'include',
         });
         return handleResponse(response);
     },
 
     async logout() {
-        const response = await fetch(`${API_URL}/auth/logout`, {
+        const response = await fetch(`${API_URL}/user/logout`, {
             method: 'POST',
             credentials: 'include',
         });
@@ -41,8 +51,8 @@ export const api = {
 
     // Posts
     async getPosts() {
-        const response = await fetch(`${API_URL}/posts`, {
-            credentials: 'include',
+        const response = await fetch(`${API_URL}/post`, {
+            headers: getHeaders(),
         });
         return handleResponse(response);
     },
@@ -56,44 +66,46 @@ export const api = {
         }
         formData.append('caption', postData.caption);
 
-        const response = await fetch(`${API_URL}/posts`, {
+        const token = localStorage.getItem('token');
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+        const response = await fetch(`${API_URL}/post`, {
             method: 'POST',
+            headers,
             body: formData,
-            credentials: 'include',
         });
         return handleResponse(response);
     },
 
     async likePost(postId) {
-        const response = await fetch(`${API_URL}/posts/${postId}/like`, {
+        const response = await fetch(`${API_URL}/like/${postId}`, {
             method: 'POST',
-            credentials: 'include',
+            headers: getHeaders(),
         });
         return handleResponse(response);
     },
 
     // Comments
     async getComments(postId) {
-        const response = await fetch(`${API_URL}/comments/${postId}`, {
-            credentials: 'include',
+        const response = await fetch(`${API_URL}/comment/${postId}`, {
+            headers: getHeaders(),
         });
         return handleResponse(response);
     },
 
     async createComment(postId, text) {
-        const response = await fetch(`${API_URL}/comments`, {
+        const response = await fetch(`${API_URL}/comment`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getHeaders(),
             body: JSON.stringify({ postId, text }),
-            credentials: 'include',
         });
         return handleResponse(response);
     },
 
     // Users
     async getUser(userId) {
-        const response = await fetch(`${API_URL}/users/${userId}`, {
-            credentials: 'include',
+        const response = await fetch(`${API_URL}/user/${userId}`, {
+            headers: getHeaders(),
         });
         return handleResponse(response);
     },
@@ -109,10 +121,13 @@ export const api = {
             }
         });
 
-        const response = await fetch(`${API_URL}/users/profile`, {
+        const token = localStorage.getItem('token');
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+        const response = await fetch(`${API_URL}/user/update`, {
             method: 'PUT',
+            headers,
             body: formData,
-            credentials: 'include',
         });
         return handleResponse(response);
     },
@@ -120,40 +135,39 @@ export const api = {
     // Feed
     async getFeed() {
         const response = await fetch(`${API_URL}/feed`, {
-            credentials: 'include',
+            headers: getHeaders(),
         });
         return handleResponse(response);
     },
 
     // Notifications
     async getNotifications() {
-        const response = await fetch(`${API_URL}/notifications`, {
-            credentials: 'include',
+        const response = await fetch(`${API_URL}/notification`, {
+            headers: getHeaders(),
         });
         return handleResponse(response);
     },
 
     // Messages
     async getConversations() {
-        const response = await fetch(`${API_URL}/conversations`, {
-            credentials: 'include',
+        const response = await fetch(`${API_URL}/chat`, {
+            headers: getHeaders(),
         });
         return handleResponse(response);
     },
 
     async getMessages(conversationId) {
-        const response = await fetch(`${API_URL}/messages/${conversationId}`, {
-            credentials: 'include',
+        const response = await fetch(`${API_URL}/message/${conversationId}`, {
+            headers: getHeaders(),
         });
         return handleResponse(response);
     },
 
     async sendMessage(conversationId, text) {
-        const response = await fetch(`${API_URL}/messages`, {
+        const response = await fetch(`${API_URL}/message`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getHeaders(),
             body: JSON.stringify({ conversationId, text }),
-            credentials: 'include',
         });
         return handleResponse(response);
     },

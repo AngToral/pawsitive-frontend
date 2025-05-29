@@ -1,23 +1,22 @@
-import { Box, Container, Flex } from '@chakra-ui/react'
 import { Outlet } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Sidebar from '../components/Sidebar'
 
 function MainLayout() {
     return (
-        <Box minH="100vh" bg="gray.50">
+        <div className="min-h-screen bg-gray-50">
             <Navbar />
-            <Container maxW="container.xl" px={4}>
-                <Flex gap={4} py={4}>
-                    <Box w="260px" display={{ base: 'none', md: 'block' }}>
+            <div className="max-w-7xl mx-auto px-4">
+                <div className="flex gap-4 py-4">
+                    <div className="w-64 hidden md:block">
                         <Sidebar />
-                    </Box>
-                    <Box flex={1}>
+                    </div>
+                    <div className="flex-1">
                         <Outlet />
-                    </Box>
-                </Flex>
-            </Container>
-        </Box>
+                    </div>
+                </div>
+            </div>
+        </div>
     )
 }
 
