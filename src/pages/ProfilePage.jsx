@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext'
 import { useNavigate, useParams } from 'react-router-dom'
 import { api } from '../services/api'
 import { HiUser, HiPencil } from 'react-icons/hi2'
+import { ThreeDots } from 'react-loader-spinner'
 
 export default function ProfilePage() {
     const { user: currentUser } = useAuth()
@@ -39,6 +40,14 @@ export default function ProfilePage() {
 
         fetchProfileData()
     }, [userId, currentUser])
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-white flex items-center justify-center">
+                <ThreeDots color="#0EA5E9" height={50} width={50} />
+            </div>
+        )
+    }
 
     if (!profileUser) return null
 
@@ -148,24 +157,19 @@ export default function ProfilePage() {
                                         style={{
                                             width: '100%',
                                             height: '100%',
-                                            objectFit: 'cover',
-                                            borderRadius: '8px'
-                                        }}
-                                        onError={(e) => {
-                                            console.error('Error al cargar la imagen:', e);
-                                            e.target.src = 'https://via.placeholder.com/300?text=Imagen+no+disponible';
+                                            objectFit: 'cover'
                                         }}
                                     />
                                 </div>
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-8 text-gray-500">
-                            No hay publicaciones todavía
+                        <div className="text-center py-8">
+                            No hay publicaciones para mostrar.
                         </div>
                     )}
                 </div>
             </div>
         </div>
     )
-} 
+}

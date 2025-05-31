@@ -1,21 +1,30 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { api } from '../services/api'
-import { HiUser, HiArrowLeft } from 'react-icons/hi2'
+import { HiUser, HiArrowLeft, HiHeart, HiOutlineHeart, HiTrash } from 'react-icons/hi2'
 import { ThreeDots } from 'react-loader-spinner'
+import { useAuth } from '../context/AuthContext'
 
 export default function PostDetailPage() {
     const { postId } = useParams()
     const [post, setPost] = useState(null)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState(null)
+    const [isLiked, setIsLiked] = useState(false)
+    const [likesCount, setLikesCount] = useState(0)
+    const [comment, setComment] = useState('')
+    const [isSubmittingComment, setIsSubmittingComment] = useState(false)
+    const [isLiking, setIsLiking] = useState(false)
     const navigate = useNavigate()
+    const { user } = useAuth()
 
     useEffect(() => {
         const fetchPost = async () => {
             try {
                 const postData = await api.getPost(postId)
                 setPost(postData)
+                setIsLiked(postData.isLiked)
+                setLikesCount(postData.likes?.length || 0)
             } catch (err) {
                 setError('Error al cargar el post')
                 console.error(err)
@@ -33,9 +42,54 @@ export default function PostDetailPage() {
         navigate(`/profile/${userId}`)
     }
 
+    const handleLike = async () => {
+        if (isLiking) return
+        setIsLiking(true)
+        try {
+            await api.likePost(postId)
+            setIsLiked(!isLiked)
+            setLikesCount(prev => isLiked ? prev - 1 : prev + 1)
+        } catch (error) {
+            console.error('Error al dar like:', error)
+        } finally {
+            setIsLiking(false)
+        }
+    }
+
+    const handleComment = async (e) => {
+        e.preventDefault()
+        if (!comment.trim() || isSubmittingComment) return
+
+        setIsSubmittingComment(true)
+        try {
+            const newComment = await api.createComment(postId, comment)
+            setPost(prev => ({
+                ...prev,
+                comments: [...(prev.comments || []), newComment]
+            }))
+            setComment('')
+        } catch (error) {
+            console.error('Error al comentar:', error)
+        } finally {
+            setIsSubmittingComment(false)
+        }
+    }
+
+    const handleDeleteComment = async (commentId) => {
+        try {
+            await api.deleteComment(postId, commentId)
+            setPost(prev => ({
+                ...prev,
+                comments: prev.comments.filter(c => c._id !== commentId)
+            }))
+        } catch (error) {
+            console.error('Error al eliminar comentario:', error)
+        }
+    }
+
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-white flex items-center justify-center">
+            <div className="flex justify-center items-center h-full">
                 <ThreeDots color="#0EA5E9" height={50} width={50} />
             </div>
         )
@@ -43,8 +97,10 @@ export default function PostDetailPage() {
 
     if (error) {
         return (
-            <div className="min-h-screen bg-white p-8">
-                <div className="text-red-500 text-center">{error}</div>
+            <div className="p-4">
+                <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg p-4">
+                    {error}
+                </div>
             </div>
         )
     }
@@ -68,7 +124,7 @@ export default function PostDetailPage() {
                     alignItems: 'center',
                     gap: '1rem'
                 }}>
-                    <Link to="/profile">
+                    <Link to="/">
                         <HiArrowLeft style={{ width: '24px', height: '24px' }} />
                     </Link>
                     <h1 style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>Publicación</h1>
@@ -108,18 +164,25 @@ export default function PostDetailPage() {
                             </div>
                         )}
                     </div>
-                    <span
-                        onClick={() => post.user?._id && handleUserClick(post.user._id)}
-                        style={{
-                            fontWeight: '500',
-                            cursor: 'pointer',
-                            ':hover': {
-                                textDecoration: 'underline'
-                            }
-                        }}
-                    >
-                        {post.user?.fullName}
-                    </span>
+                    <div>
+                        <h2
+                            onClick={() => post.user?._id && handleUserClick(post.user._id)}
+                            style={{
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                ':hover': { textDecoration: 'underline' }
+                            }}
+                        >
+                            {post.user?.fullName}
+                        </h2>
+                        <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                            {new Date(post.createdAt).toLocaleDateString('es-ES', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                            })}
+                        </p>
+                    </div>
                 </div>
 
                 {/* Imágenes */}
@@ -143,20 +206,21 @@ export default function PostDetailPage() {
                     ))}
                 </div>
 
-                {/* Botones de interacción */}
-                <div className="mt-4 flex items-center space-x-4 text-gray-500">
-                    <button className="flex items-center space-x-2 hover:text-primary-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                        </svg>
-                        <span>{post.likes?.length || 0}</span>
-                    </button>
-
-                    <button className="flex items-center space-x-2 hover:text-primary-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 01-.923 1.785A5.969 5.969 0 006 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337z" />
-                        </svg>
-                        <span>{post.comments?.length || 0}</span>
+                {/* Acciones */}
+                <div className="flex items-center gap-4 mb-4">
+                    <button
+                        onClick={handleLike}
+                        disabled={isLiking}
+                        className={`flex items-center gap-2 ${isLiked ? 'text-red-500' : ''} ${isLiking ? 'opacity-50' : 'hover:text-red-500'}`}
+                    >
+                        {isLiking ? (
+                            <ThreeDots color="#0EA5E9" height={24} width={24} />
+                        ) : isLiked ? (
+                            <HiHeart className="w-6 h-6" />
+                        ) : (
+                            <HiOutlineHeart className="w-6 h-6" />
+                        )}
+                        <span>{likesCount}</span>
                     </button>
                 </div>
 
@@ -165,14 +229,122 @@ export default function PostDetailPage() {
                     {post.caption}
                 </p>
 
-                {/* Fecha */}
-                <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>
-                    {new Date(post.createdAt).toLocaleDateString('es-ES', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                    })}
-                </p>
+                {/* Comentarios */}
+                <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '1rem' }}>
+                    <h3 style={{ fontWeight: '600', fontSize: '1.125rem', marginBottom: '1rem' }}>
+                        Comentarios ({post.comments?.length || 0})
+                    </h3>
+
+                    {/* Lista de comentarios */}
+                    <div style={{ marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {post.comments?.map((comment) => (
+                            <div key={comment._id} style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+                                <div
+                                    onClick={() => handleUserClick(comment.user._id)}
+                                    style={{ cursor: 'pointer' }}
+                                >
+                                    {comment.user?.profilePicture ? (
+                                        <img
+                                            src={comment.user.profilePicture}
+                                            alt={comment.user?.fullName}
+                                            style={{
+                                                width: '32px',
+                                                height: '32px',
+                                                borderRadius: '50%',
+                                                objectFit: 'cover'
+                                            }}
+                                        />
+                                    ) : (
+                                        <div style={{
+                                            width: '32px',
+                                            height: '32px',
+                                            borderRadius: '50%',
+                                            backgroundColor: '#f3f4f6',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
+                                        }}>
+                                            <HiUser style={{ width: '20px', height: '20px', color: '#9ca3af' }} />
+                                        </div>
+                                    )}
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{
+                                        backgroundColor: '#f3f4f6',
+                                        borderRadius: '16px',
+                                        padding: '0.5rem 1rem'
+                                    }}>
+                                        <h4
+                                            onClick={() => handleUserClick(comment.user._id)}
+                                            style={{
+                                                fontWeight: '600',
+                                                cursor: 'pointer',
+                                                ':hover': { textDecoration: 'underline' }
+                                            }}
+                                        >
+                                            {comment.user?.fullName}
+                                        </h4>
+                                        <p>{comment.text}</p>
+                                    </div>
+                                    <p style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '0.25rem' }}>
+                                        {new Date(comment.createdAt).toLocaleDateString('es-ES', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric'
+                                        })}
+                                    </p>
+                                </div>
+                                {(user?._id === comment.user._id || user?._id === post.user._id) && (
+                                    <button
+                                        onClick={() => handleDeleteComment(comment._id)}
+                                        className="text-gray-400 hover:text-red-500"
+                                    >
+                                        <HiTrash className="w-5 h-5" />
+                                    </button>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Formulario de comentarios */}
+                    <form onSubmit={handleComment} style={{ display: 'flex', gap: '1rem' }}>
+                        <div style={{ flex: 1 }}>
+                            <input
+                                type="text"
+                                placeholder="Escribe un comentario..."
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                                disabled={isSubmittingComment}
+                                style={{
+                                    width: '100%',
+                                    padding: '0.5rem 1rem',
+                                    border: '1px solid #d1d5db',
+                                    borderRadius: '0.5rem',
+                                    outline: 'none'
+                                }}
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            disabled={!comment.trim() || isSubmittingComment}
+                            style={{
+                                padding: '0.5rem 1.5rem',
+                                backgroundColor: '#0EA5E9',
+                                color: 'white',
+                                borderRadius: '0.5rem',
+                                fontWeight: '500',
+                                opacity: (!comment.trim() || isSubmittingComment) ? '0.5' : '1',
+                                cursor: (!comment.trim() || isSubmittingComment) ? 'not-allowed' : 'pointer'
+                            }}
+                        >
+                            {isSubmittingComment ? (
+                                <ThreeDots color="#ffffff" height={24} width={24} />
+                            ) : (
+                                'Enviar'
+                            )}
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     )

@@ -1,52 +1,124 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../services/api'
-import { HiUser } from 'react-icons/hi'
-
-const API_URL = import.meta.env.VITE_BACKEND || 'http://localhost:3000'
+import { HiUser, HiHeart, HiOutlineHeart, HiTrash } from 'react-icons/hi2'
+import { ThreeDots } from 'react-loader-spinner'
+import { useAuth } from '../context/AuthContext'
 
 export default function Home() {
     const [posts, setPosts] = useState([])
     const [isLoading, setIsLoading] = useState(true)
-    const [error, setError] = useState(null)
+    const [expandedComments, setExpandedComments] = useState({})
+    const [comments, setComments] = useState({})
+    const [isSubmittingComment, setIsSubmittingComment] = useState({})
+    const [isLiking, setIsLiking] = useState({})
     const navigate = useNavigate()
-
-    const fetchPosts = async () => {
-        try {
-            const data = await api.getPosts()
-            console.log('Posts recibidos:', data)
-            console.log('Ejemplo de imágenes del primer post:', JSON.stringify(data[0]?.images, null, 2))
-            setPosts(data)
-        } catch (err) {
-            console.error('Error al obtener posts:', err)
-            setError(err.message)
-        } finally {
-            setIsLoading(false)
-        }
-    }
+    const { user } = useAuth()
 
     useEffect(() => {
         fetchPosts()
     }, [])
 
+    const fetchPosts = async () => {
+        try {
+            const postsData = await api.getPosts()
+            setPosts(postsData)
+            // Inicializar estados para comentarios
+            const commentsState = {}
+            postsData.forEach(post => {
+                commentsState[post._id] = ''
+            })
+            setComments(commentsState)
+        } catch (err) {
+            console.error(err)
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
     const handleUserClick = (userId) => {
         navigate(`/profile/${userId}`)
+    }
+
+    const handlePostClick = (postId) => {
+        navigate(`/post/${postId}`)
+    }
+
+    const handleLike = async (postId) => {
+        if (isLiking[postId]) return
+        setIsLiking(prev => ({ ...prev, [postId]: true }))
+        try {
+            await api.likePost(postId)
+            setPosts(prevPosts => prevPosts.map(post => {
+                if (post._id === postId) {
+                    const wasLiked = post.isLiked
+                    return {
+                        ...post,
+                        isLiked: !wasLiked,
+                        likes: wasLiked ? post.likes - 1 : post.likes + 1
+                    }
+                }
+                return post
+            }))
+        } catch (error) {
+            console.error('Error al dar like:', error)
+        } finally {
+            setIsLiking(prev => ({ ...prev, [postId]: false }))
+        }
+    }
+
+    const handleComment = async (e, postId) => {
+        e.preventDefault()
+        if (!comments[postId]?.trim() || isSubmittingComment[postId]) return
+
+        setIsSubmittingComment(prev => ({ ...prev, [postId]: true }))
+        try {
+            const newComment = await api.createComment(postId, comments[postId])
+            setPosts(prevPosts => prevPosts.map(post => {
+                if (post._id === postId) {
+                    return {
+                        ...post,
+                        comments: [...(post.comments || []), newComment]
+                    }
+                }
+                return post
+            }))
+            setComments(prev => ({ ...prev, [postId]: '' }))
+        } catch (error) {
+            console.error('Error al comentar:', error)
+        } finally {
+            setIsSubmittingComment(prev => ({ ...prev, [postId]: false }))
+        }
+    }
+
+    const handleDeleteComment = async (postId, commentId) => {
+        try {
+            await api.deleteComment(postId, commentId)
+            setPosts(prevPosts => prevPosts.map(post => {
+                if (post._id === postId) {
+                    return {
+                        ...post,
+                        comments: post.comments.filter(c => c._id !== commentId)
+                    }
+                }
+                return post
+            }))
+        } catch (error) {
+            console.error('Error al eliminar comentario:', error)
+        }
+    }
+
+    const toggleComments = (postId) => {
+        setExpandedComments(prev => ({
+            ...prev,
+            [postId]: !prev[postId]
+        }))
     }
 
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-full">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
-            </div>
-        )
-    }
-
-    if (error) {
-        return (
-            <div className="p-4">
-                <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg p-4">
-                    {error}
-                </div>
+                <ThreeDots color="#0EA5E9" height={50} width={50} />
             </div>
         )
     }
@@ -62,6 +134,7 @@ export default function Home() {
                     {posts.map(post => (
                         <div key={post._id} className="bg-white rounded-lg shadow">
                             <div className="p-4">
+                                {/* Cabecera del post */}
                                 <div className="flex items-center space-x-3">
                                     <div
                                         onClick={() => handleUserClick(post.user._id)}
@@ -74,8 +147,16 @@ export default function Home() {
                                                 style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
                                             />
                                         ) : (
-                                            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                                                <HiUser className="w-6 h-6 text-gray-500" />
+                                            <div style={{
+                                                width: '40px',
+                                                height: '40px',
+                                                borderRadius: '50%',
+                                                backgroundColor: '#f3f4f6',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center'
+                                            }}>
+                                                <HiUser style={{ width: '24px', height: '24px', color: '#9ca3af' }} />
                                             </div>
                                         )}
                                     </div>
@@ -92,8 +173,10 @@ export default function Home() {
                                     </div>
                                 </div>
 
+                                {/* Contenido del post */}
                                 <p className="mt-3">{post.caption}</p>
 
+                                {/* Imágenes */}
                                 {post.images && post.images.length > 0 && (
                                     <div className={`mt-3 grid gap-2 ${post.images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
                                         {post.images.map((image, index) => {
@@ -107,6 +190,7 @@ export default function Home() {
                                                     style={{
                                                         height: post.images.length === 1 ? '256px' : '160px'
                                                     }}
+                                                    onClick={() => handlePostClick(post._id)}
                                                     onError={(e) => {
                                                         console.error('Error al cargar la imagen:', imageUrl);
                                                         e.target.style.display = 'none';
@@ -117,21 +201,120 @@ export default function Home() {
                                     </div>
                                 )}
 
+                                {/* Acciones */}
                                 <div className="mt-4 flex items-center space-x-4 text-gray-500">
-                                    <button className="flex items-center space-x-2 hover:text-primary-500">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                                        </svg>
-                                        <span>{post.likes?.length || 0}</span>
+                                    <button
+                                        onClick={() => handleLike(post._id)}
+                                        disabled={isLiking[post._id]}
+                                        className={`flex items-center gap-2 ${post.isLiked ? 'text-red-500' : ''} ${isLiking[post._id] ? 'opacity-50' : 'hover:text-red-500'}`}
+                                    >
+                                        {isLiking[post._id] ? (
+                                            <ThreeDots color="#0EA5E9" height={24} width={24} />
+                                        ) : post.isLiked ? (
+                                            <HiHeart className="w-6 h-6" />
+                                        ) : (
+                                            <HiOutlineHeart className="w-6 h-6" />
+                                        )}
+                                        <span>{post.likes}</span>
                                     </button>
 
-                                    <button className="flex items-center space-x-2 hover:text-primary-500">
+                                    <button
+                                        onClick={() => toggleComments(post._id)}
+                                        className="flex items-center space-x-2 hover:text-primary-500"
+                                    >
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 01-.923 1.785A5.969 5.969 0 006 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337z" />
                                         </svg>
                                         <span>{post.comments?.length || 0}</span>
                                     </button>
                                 </div>
+
+                                {/* Comentarios */}
+                                {expandedComments[post._id] && (
+                                    <div className="mt-4 border-t border-gray-100 pt-4">
+                                        {/* Lista de comentarios */}
+                                        <div className="space-y-4 mb-4">
+                                            {post.comments?.map((comment) => (
+                                                <div key={comment._id} className="flex items-start gap-3">
+                                                    <div
+                                                        onClick={() => handleUserClick(comment.user._id)}
+                                                        style={{ cursor: 'pointer' }}
+                                                    >
+                                                        {comment.user?.profilePicture ? (
+                                                            <img
+                                                                src={comment.user.profilePicture}
+                                                                alt={comment.user?.fullName}
+                                                                style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }}
+                                                            />
+                                                        ) : (
+                                                            <div style={{
+                                                                width: '32px',
+                                                                height: '32px',
+                                                                borderRadius: '50%',
+                                                                backgroundColor: '#f3f4f6',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center'
+                                                            }}>
+                                                                <HiUser style={{ width: '20px', height: '20px', color: '#9ca3af' }} />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <div className="bg-gray-100 rounded-2xl px-4 py-2">
+                                                            <h4
+                                                                onClick={() => handleUserClick(comment.user._id)}
+                                                                className="font-semibold cursor-pointer hover:underline"
+                                                            >
+                                                                {comment.user?.fullName}
+                                                            </h4>
+                                                            <p>{comment.text}</p>
+                                                        </div>
+                                                        <p className="text-sm text-gray-500 mt-1">
+                                                            {new Date(comment.createdAt).toLocaleDateString()}
+                                                        </p>
+                                                    </div>
+                                                    {(user?._id === comment.user._id || user?._id === post.user._id) && (
+                                                        <button
+                                                            onClick={() => handleDeleteComment(post._id, comment._id)}
+                                                            className="text-gray-400 hover:text-red-500"
+                                                        >
+                                                            <HiTrash className="w-5 h-5" />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        {/* Formulario de comentarios */}
+                                        <form onSubmit={(e) => handleComment(e, post._id)} className="flex gap-4">
+                                            <div className="flex-1">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Escribe un comentario..."
+                                                    value={comments[post._id] || ''}
+                                                    onChange={(e) => setComments(prev => ({
+                                                        ...prev,
+                                                        [post._id]: e.target.value
+                                                    }))}
+                                                    disabled={isSubmittingComment[post._id]}
+                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                                />
+                                            </div>
+                                            <button
+                                                type="submit"
+                                                disabled={!comments[post._id]?.trim() || isSubmittingComment[post._id]}
+                                                className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                {isSubmittingComment[post._id] ? (
+                                                    <ThreeDots color="#ffffff" height={24} width={24} />
+                                                ) : (
+                                                    'Enviar'
+                                                )}
+                                            </button>
+                                        </form>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ))}

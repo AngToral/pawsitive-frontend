@@ -112,30 +112,24 @@ export default function CreatePostPage() {
                     </div>
 
                     {previewUrls.length > 0 && (
-                        <div className="flex gap-2" style={{ maxWidth: '1000px' }}>
+                        <div className="grid grid-cols-2 gap-4">
                             {previewUrls.map((url, index) => (
-                                <div key={index} className="flex items-center gap-2 rounded-lg border border-gray-200 group">
+                                <div key={index} className="relative aspect-square rounded-lg overflow-hidden">
                                     <img
                                         src={url}
                                         alt={`Preview ${index + 1}`}
-                                        style={{
-                                            width: '100px',
-                                            height: '100px',
-                                            objectFit: 'cover',
-                                            borderRadius: '8px'
-                                        }}
+                                        className="w-full h-full object-cover"
                                     />
                                     <button
                                         type="button"
                                         onClick={() => {
-                                            const newImages = images.filter((_, i) => i !== index);
-                                            const newUrls = previewUrls.filter((_, i) => i !== index);
-                                            setImages(newImages);
-                                            setPreviewUrls(newUrls);
-                                            URL.revokeObjectURL(url);
+                                            const newImages = images.filter((_, i) => i !== index)
+                                            const newUrls = previewUrls.filter((_, i) => i !== index)
+                                            setImages(newImages)
+                                            setPreviewUrls(newUrls)
+                                            URL.revokeObjectURL(url)
                                         }}
-                                        className="bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors shadow-md text-lg font-bold"
-                                        aria-label="Eliminar imagen"
+                                        className="absolute top-2 right-2 bg-black bg-opacity-50 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-opacity-70"
                                     >
                                         ×
                                     </button>

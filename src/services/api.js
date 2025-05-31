@@ -206,6 +206,14 @@ export const api = {
         return handleResponse(response);
     },
 
+    async deleteComment(postId, commentId) {
+        const response = await fetch(`${API_URL}/comment/${postId}/${commentId}`, {
+            method: 'DELETE',
+            headers: getHeaders(),
+        });
+        return handleResponse(response);
+    },
+
     // Users
     async getUser(userId) {
         try {

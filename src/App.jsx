@@ -5,6 +5,7 @@ import Register from './pages/Register'
 import Home from './pages/Home'
 import ProfilePage from './pages/ProfilePage'
 import PostDetailPage from './pages/PostDetailPage'
+import CreatePostPage from './pages/CreatePost'
 import PrivateRoute from './components/PrivateRoute'
 import Layout from './components/Layout'
 
@@ -18,6 +19,7 @@ function App() {
         <Route path="/profile" element={<PrivateRoute><Layout><ProfilePage /></Layout></PrivateRoute>} />
         <Route path="/profile/:userId" element={<PrivateRoute><Layout><ProfilePage /></Layout></PrivateRoute>} />
         <Route path="/post/:postId" element={<PrivateRoute><Layout><PostDetailPage /></Layout></PrivateRoute>} />
+        <Route path="/create" element={<PrivateRoute><Layout><CreatePostPage /></Layout></PrivateRoute>} />
       </Routes>
     </AuthProvider>
   )
