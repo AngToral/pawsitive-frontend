@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../services/api'
-import { HiUser, HiHeart, HiOutlineHeart, HiTrash, HiShare } from 'react-icons/hi2'
+import { HiUser, HiHeart, HiOutlineHeart, HiTrash } from 'react-icons/hi2'
 import { ThreeDots } from 'react-loader-spinner'
 import { useAuth } from '../context/AuthContext'
-import ShareModal from '../components/ShareModal'
 
 export default function Home() {
     const [posts, setPosts] = useState([])
@@ -13,7 +12,6 @@ export default function Home() {
     const [comments, setComments] = useState({})
     const [isSubmittingComment, setIsSubmittingComment] = useState({})
     const [isLiking, setIsLiking] = useState({})
-    const [shareModalPost, setShareModalPost] = useState(null)
     const navigate = useNavigate()
     const { user } = useAuth()
 
@@ -187,10 +185,6 @@ export default function Home() {
         }))
     }
 
-    const handleShare = (post) => {
-        setShareModalPost(post)
-    }
-
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-full">
@@ -278,43 +272,33 @@ export default function Home() {
                                 )}
 
                                 {/* Acciones */}
-                                <div className="flex justify-between p-4">
-                                    <div className="flex gap-4">
-                                        <button
-                                            onClick={() => handleLike(post._id)}
-                                            disabled={isLiking[post._id]}
-                                            className={`flex items-center gap-2 ${post.isLiked ? 'text-red-500' : ''} ${isLiking[post._id] ? 'opacity-50' : ''}`}
-                                        >
-                                            {isLiking[post._id] ? (
-                                                <ThreeDots color="#0EA5E9" height={24} width={24} />
-                                            ) : post.isLiked ? (
-                                                <HiHeart className="w-6 h-6" />
-                                            ) : (
-                                                <HiOutlineHeart className="w-6 h-6" />
-                                            )}
-                                            <span>{post.likes?.length || 0}</span>
-                                        </button>
-                                        <button
-                                            onClick={() => toggleComments(post._id)}
-                                            className="flex items-center gap-2"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 01-.923 1.785A5.969 5.969 0 006 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337z" />
-                                            </svg>
-                                            <span>{post.comments?.length || 0}</span>
-                                        </button>
-                                        <button
-                                            onClick={() => handleShare(post)}
-                                            className="flex items-center gap-2"
-                                        >
-                                            <HiShare className="w-6 h-6" />
-                                        </button>
-                                    </div>
-                                </div>
+                                <div className="mt-4 flex items-center space-x-4 text-gray-500">
+                                    <button
+                                        onClick={() => handleLike(post._id)}
+                                        disabled={isLiking[post._id]}
+                                        className={`flex items-center gap-2 ${post.isLiked ? 'text-red-500' : ''} ${isLiking[post._id] ? 'opacity-50' : 'hover:text-red-500'}`}
+                                    >
+                                        {isLiking[post._id] ? (
+                                            <ThreeDots color="#0EA5E9" height={24} width={24} />
+                                        ) : post.isLiked || (post.likes && post.likes.includes(user._id)) ? (
+                                            <HiHeart className="w-6 h-6" />
+                                        ) : (
+                                            <HiOutlineHeart className="w-6 h-6" />
+                                        )}
+                                        {(post.likes?.length > 0) && (
+                                            <span>{post.likes.length}</span>
+                                        )}
+                                    </button>
 
-                                {/* Likes y caption */}
-                                <div className="px-4">
-                                    <p className="font-bold">{post.likes?.length || 0} me gusta</p>
+                                    <button
+                                        onClick={() => toggleComments(post._id)}
+                                        className="flex items-center space-x-2 hover:text-primary-500"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 01-.923 1.785A5.969 5.969 0 006 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337z" />
+                                        </svg>
+                                        <span>{post.comments?.length || 0}</span>
+                                    </button>
                                 </div>
 
                                 {/* Comentarios */}
@@ -407,15 +391,6 @@ export default function Home() {
                         </div>
                     ))}
                 </div>
-            )}
-
-            {/* Modal de compartir */}
-            {shareModalPost && (
-                <ShareModal
-                    isOpen={true}
-                    onClose={() => setShareModalPost(null)}
-                    post={shareModalPost}
-                />
             )}
         </div>
     )
