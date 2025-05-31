@@ -592,4 +592,45 @@ export const api = {
             return { followers: 0, following: 0 };
         }
     },
+
+    async searchUsers(searchTerm) {
+        try {
+            console.log('Buscando usuarios con término:', searchTerm);
+            const response = await fetch(`${API_URL}/user/search?username=${encodeURIComponent(searchTerm)}&fullName=${encodeURIComponent(searchTerm)}`, {
+                method: 'GET',
+                headers: {
+                    ...getHeaders(),
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                console.error('Error al buscar usuarios:', errorData);
+                throw new Error('Error al buscar usuarios');
+            }
+
+            const data = await response.json();
+            console.log('Respuesta de búsqueda:', {
+                término: searchTerm,
+                resultados: data.map(user => ({
+                    id: user._id,
+                    username: user.username,
+                    fullName: user.fullName,
+                    matchType: user.username.toLowerCase().includes(searchTerm.toLowerCase()) ? 'username' : 'fullName'
+                }))
+            });
+
+            // Filtrar los resultados localmente también para asegurar precisión
+            const filteredData = data.filter(user =>
+                user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                user.fullName.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+
+            return filteredData;
+        } catch (error) {
+            console.error('Error en searchUsers:', error);
+            throw error;
+        }
+    },
 } 
