@@ -746,4 +746,55 @@ export const api = {
             throw error;
         }
     },
+
+    // Búsqueda de usuarios
+    async searchUsers(query) {
+        try {
+            const response = await fetch(`${API_URL}/users/search?q=${encodeURIComponent(query)}`, {
+                credentials: 'include'
+            });
+            if (!response.ok) throw new Error('Error al buscar usuarios');
+            return await response.json();
+        } catch (error) {
+            console.error('Error en searchUsers:', error);
+            throw error;
+        }
+    },
+
+    // Obtener o crear conversación
+    async getOrCreateConversation(userId) {
+        try {
+            const response = await fetch(`${API_URL}/conversations/with/${userId}`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+            if (!response.ok) throw new Error('Error al obtener/crear conversación');
+            return await response.json();
+        } catch (error) {
+            console.error('Error en getOrCreateConversation:', error);
+            throw error;
+        }
+    },
+
+    // Enviar mensaje
+    async sendMessage(conversationId, content) {
+        try {
+            const response = await fetch(`${API_URL}/messages`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    conversation: conversationId,
+                    content
+                })
+            });
+            if (!response.ok) throw new Error('Error al enviar mensaje');
+            return await response.json();
+        } catch (error) {
+            console.error('Error en sendMessage:', error);
+            throw error;
+        }
+    },
 } 
