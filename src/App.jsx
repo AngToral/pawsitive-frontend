@@ -9,6 +9,7 @@ import CreatePostPage from './pages/CreatePost'
 import SearchPage from './pages/SearchPage'
 import PrivateRoute from './components/PrivateRoute'
 import Layout from './components/Layout'
+import MessagesPage from './pages/MessagesPage'
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="/post/:postId" element={<PrivateRoute><Layout><PostDetailPage /></Layout></PrivateRoute>} />
         <Route path="/create" element={<PrivateRoute><Layout><CreatePostPage /></Layout></PrivateRoute>} />
         <Route path="/search" element={<PrivateRoute><Layout><SearchPage /></Layout></PrivateRoute>} />
+        <Route path="/messages" element={<PrivateRoute><Layout><MessagesPage /></Layout></PrivateRoute>} />
       </Routes>
     </AuthProvider>
   )

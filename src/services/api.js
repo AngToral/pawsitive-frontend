@@ -401,19 +401,90 @@ export const api = {
     },
 
     async getMessages(conversationId) {
-        const response = await fetch(`${API_URL}/message/${conversationId}`, {
-            headers: getHeaders(),
-        });
-        return handleResponse(response);
+        try {
+            console.log('Obteniendo mensajes de la conversación:', conversationId);
+            const response = await fetch(`${API_URL}/chat/${conversationId}/messages`, {
+                method: 'GET',
+                headers: {
+                    ...getHeaders(),
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                console.error('Error al obtener mensajes:', errorData);
+                throw new Error('Error al obtener los mensajes');
+            }
+
+            const data = await response.json();
+            console.log('Mensajes obtenidos:', data);
+            return data;
+        } catch (error) {
+            console.error('Error en getMessages:', error);
+            throw error;
+        }
+    },
+
+    async getOrCreateConversation(userId) {
+        try {
+            console.log('Intentando obtener o crear conversación con usuario:', userId);
+            const response = await fetch(`${API_URL}/chat`, {
+                method: 'POST',
+                headers: {
+                    ...getHeaders(),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ participantId: userId }),
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                console.error('Error al crear/obtener conversación:', errorData);
+                throw new Error('Error al iniciar la conversación');
+            }
+
+            const data = await response.json();
+            console.log('Conversación creada/obtenida:', data);
+            return data;
+        } catch (error) {
+            console.error('Error en getOrCreateConversation:', error);
+            throw error;
+        }
     },
 
     async sendMessage(conversationId, text) {
-        const response = await fetch(`${API_URL}/message`, {
-            method: 'POST',
-            headers: getHeaders(),
-            body: JSON.stringify({ conversationId, text }),
-        });
-        return handleResponse(response);
+        try {
+            console.log('Enviando mensaje:', { conversationId, text });
+            const response = await fetch(`${API_URL}/message/send`, {
+                method: 'POST',
+                headers: {
+                    ...getHeaders(),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    conversationId,
+                    content: text,
+                    type: 'text'
+                }),
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                console.error('Error al enviar mensaje:', errorData);
+                throw new Error('Error al enviar el mensaje');
+            }
+
+            const data = await response.json();
+            console.log('Mensaje enviado:', data);
+            return data;
+        } catch (error) {
+            console.error('Error en sendMessage:', error);
+            throw error;
+        }
     },
 
     async getUserPosts(userId) {
@@ -630,6 +701,48 @@ export const api = {
             return filteredData;
         } catch (error) {
             console.error('Error en searchUsers:', error);
+            throw error;
+        }
+    },
+
+    async searchMessages(conversationId, searchTerm) {
+        try {
+            console.log('Buscando mensajes con término:', searchTerm, 'en conversación:', conversationId);
+            const response = await fetch(`${API_URL}/message/${conversationId}/search?term=${encodeURIComponent(searchTerm)}`, {
+                method: 'GET',
+                headers: {
+                    ...getHeaders(),
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                console.error('Error al buscar mensajes:', errorData);
+                throw new Error('Error al buscar mensajes');
+            }
+
+            const data = await response.json();
+            console.log('Respuesta de búsqueda de mensajes:', {
+                término: searchTerm,
+                conversación: conversationId,
+                resultados: data.map(message => ({
+                    id: message._id,
+                    text: message.text,
+                    sender: message.sender,
+                    createdAt: message.createdAt,
+                    matchType: 'text'
+                }))
+            });
+
+            // Filtrar los resultados localmente también para asegurar precisión
+            const filteredData = data.filter(message =>
+                message.text.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+
+            return filteredData;
+        } catch (error) {
+            console.error('Error en searchMessages:', error);
             throw error;
         }
     },
