@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../services/api'
 import { HiPhoto, HiUser } from 'react-icons/hi2'
@@ -10,6 +11,7 @@ export default function CreatePost({ onPostCreated }) {
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState(null)
     const { user } = useAuth()
+    const navigate = useNavigate()
 
     // Limpiar las URLs de vista previa cuando el componente se desmonte
     useEffect(() => {
@@ -54,6 +56,10 @@ export default function CreatePost({ onPostCreated }) {
         }
     }
 
+    const handleProfileClick = () => {
+        navigate('/profile')
+    }
+
     return (
         <div className="max-w-2xl mx-auto">
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -64,17 +70,22 @@ export default function CreatePost({ onPostCreated }) {
                 )}
 
                 <div className="flex items-start space-x-4">
-                    {user?.profilePicture ? (
-                        <img
-                            src={`${user.profilePicture}?${new Date().getTime()}`}
-                            alt={user?.fullName}
-                            style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }}
-                        />
-                    ) : (
-                        <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
-                            <HiUser className="w-7 h-7 text-gray-500" />
-                        </div>
-                    )}
+                    <div
+                        onClick={handleProfileClick}
+                        style={{ cursor: 'pointer' }}
+                    >
+                        {user?.profilePicture ? (
+                            <img
+                                src={`${user.profilePicture}?${new Date().getTime()}`}
+                                alt={user?.fullName}
+                                style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }}
+                            />
+                        ) : (
+                            <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                                <HiUser className="w-7 h-7 text-gray-500" />
+                            </div>
+                        )}
+                    </div>
                     <textarea
                         value={caption}
                         onChange={(e) => setCaption(e.target.value)}

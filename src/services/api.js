@@ -298,4 +298,56 @@ export const api = {
         });
         return handleResponse(response);
     },
+
+    async getUserPosts(userId) {
+        try {
+            console.log('Intentando obtener posts del usuario con ID:', userId);
+            const response = await fetch(`${API_URL}/post?userId=${userId}`, {
+                headers: getHeaders(),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                console.error('Respuesta del servidor:', errorData);
+                throw new Error('Error al obtener los posts del usuario');
+            }
+
+            const data = await response.json();
+            console.log('Estructura de los posts recibidos:', data.map(post => ({
+                id: post._id,
+                caption: post.caption,
+                imageStructure: post.images && post.images[0] ?
+                    typeof post.images[0] === 'string' ?
+                        'URL directa' :
+                        Object.keys(post.images[0])
+                    : 'No hay imágenes'
+            })));
+            return data;
+        } catch (error) {
+            console.error('Error en getUserPosts:', error);
+            throw error;
+        }
+    },
+
+    async getPost(postId) {
+        try {
+            console.log('Intentando obtener post con ID:', postId);
+            const response = await fetch(`${API_URL}/post/${postId}`, {
+                headers: getHeaders(),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                console.error('Respuesta del servidor:', errorData);
+                throw new Error('Error al obtener el post');
+            }
+
+            const data = await response.json();
+            console.log('Post obtenido correctamente:', data);
+            return data;
+        } catch (error) {
+            console.error('Error en getPost:', error);
+            throw error;
+        }
+    },
 } 

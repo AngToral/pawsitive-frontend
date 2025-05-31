@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../services/api'
 import { HiUser } from 'react-icons/hi'
 
@@ -8,6 +9,7 @@ export default function Home() {
     const [posts, setPosts] = useState([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState(null)
+    const navigate = useNavigate()
 
     const fetchPosts = async () => {
         try {
@@ -26,6 +28,10 @@ export default function Home() {
     useEffect(() => {
         fetchPosts()
     }, [])
+
+    const handleUserClick = (userId) => {
+        navigate(`/profile/${userId}`)
+    }
 
     if (isLoading) {
         return (
@@ -57,19 +63,29 @@ export default function Home() {
                         <div key={post._id} className="bg-white rounded-lg shadow">
                             <div className="p-4">
                                 <div className="flex items-center space-x-3">
-                                    {post.user.profilePicture ? (
-                                        <img
-                                            src={`${post.user.profilePicture}?${new Date().getTime()}`}
-                                            alt={post.user.fullName}
-                                            style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
-                                        />
-                                    ) : (
-                                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                                            <HiUser className="w-6 h-6 text-gray-500" />
-                                        </div>
-                                    )}
+                                    <div
+                                        onClick={() => handleUserClick(post.user._id)}
+                                        style={{ cursor: 'pointer' }}
+                                    >
+                                        {post.user.profilePicture ? (
+                                            <img
+                                                src={`${post.user.profilePicture}?${new Date().getTime()}`}
+                                                alt={post.user.fullName}
+                                                style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+                                            />
+                                        ) : (
+                                            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                                                <HiUser className="w-6 h-6 text-gray-500" />
+                                            </div>
+                                        )}
+                                    </div>
                                     <div>
-                                        <h3 className="font-semibold">{post.user.fullName}</h3>
+                                        <h3
+                                            className="font-semibold cursor-pointer hover:underline"
+                                            onClick={() => handleUserClick(post.user._id)}
+                                        >
+                                            {post.user.fullName}
+                                        </h3>
                                         <p className="text-sm text-gray-500">
                                             {new Date(post.createdAt).toLocaleDateString()}
                                         </p>

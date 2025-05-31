@@ -1,11 +1,12 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
-import MainLayout from './layouts/MainLayout'
-import ProtectedRoute from './components/ProtectedRoute'
-import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
-import CreatePostPage from './pages/CreatePost'
+import Home from './pages/Home'
+import ProfilePage from './pages/ProfilePage'
+import PostDetailPage from './pages/PostDetailPage'
+import PrivateRoute from './components/PrivateRoute'
+import Layout from './components/Layout'
 
 function App() {
   return (
@@ -13,18 +14,10 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <MainLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<Home />} />
-          <Route path="create" element={<CreatePostPage />} />
-          {/* Aquí irán más rutas protegidas */}
-        </Route>
+        <Route path="/" element={<PrivateRoute><Layout><Home /></Layout></PrivateRoute>} />
+        <Route path="/profile" element={<PrivateRoute><Layout><ProfilePage /></Layout></PrivateRoute>} />
+        <Route path="/profile/:userId" element={<PrivateRoute><Layout><ProfilePage /></Layout></PrivateRoute>} />
+        <Route path="/post/:postId" element={<PrivateRoute><Layout><PostDetailPage /></Layout></PrivateRoute>} />
       </Routes>
     </AuthProvider>
   )

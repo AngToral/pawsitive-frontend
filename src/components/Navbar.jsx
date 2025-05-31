@@ -47,8 +47,7 @@ export default function Navbar() {
                     <Link
                         key={index}
                         to={item.path}
-                        className={`flex items-center px-3 py-3 text-base rounded-lg transition-colors ${location.pathname === item.path ? 'font-bold' : 'hover:bg-gray-100'
-                            }`}
+                        className={`flex items-center px-3 py-3 text-base rounded-lg transition-colors ${location.pathname === item.path ? 'font-bold' : 'hover:bg-gray-100'}`}
                     >
                         <span className={location.pathname === item.path ? 'text-gray-900' : 'text-gray-500'}>
                             {item.icon}
@@ -59,8 +58,7 @@ export default function Navbar() {
 
                 <Link
                     to="/profile"
-                    className={`flex items-center px-3 py-3 text-base rounded-lg transition-colors ${location.pathname === '/profile' ? 'font-bold' : 'hover:bg-gray-100'
-                        }`}
+                    className={`flex items-center px-3 py-3 text-base rounded-lg transition-colors ${location.pathname === '/profile' ? 'font-bold' : 'hover:bg-gray-100'}`}
                 >
                     {user?.profilePicture ? (
                         <img
