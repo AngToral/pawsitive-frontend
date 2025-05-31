@@ -182,36 +182,136 @@ export const api = {
     },
 
     async likePost(postId) {
-        const response = await fetch(`${API_URL}/like/${postId}`, {
-            method: 'POST',
-            headers: getHeaders(),
-        });
-        return handleResponse(response);
+        try {
+            console.log('Intentando dar like al post:', postId);
+            const response = await fetch(`${API_URL}/post/${postId}/like`, {
+                method: 'POST',
+                headers: {
+                    ...getHeaders(),
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    postId: postId
+                })
+            });
+
+            console.log('Respuesta del servidor:', {
+                status: response.status,
+                statusText: response.statusText
+            });
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                console.error('Error del servidor:', errorData);
+                try {
+                    const jsonError = JSON.parse(errorData);
+                    throw new Error(jsonError.message || 'Error al modificar el like');
+                } catch {
+                    throw new Error(`Error del servidor: ${errorData}`);
+                }
+            }
+
+            const data = await response.json();
+            console.log('Like procesado correctamente:', data);
+            return data;
+        } catch (error) {
+            console.error('Error completo en likePost:', error);
+            throw error;
+        }
     },
 
     // Comments
     async getComments(postId) {
-        const response = await fetch(`${API_URL}/comment/${postId}`, {
+        const response = await fetch(`${API_URL}/posts/${postId}/comments`, {
             headers: getHeaders(),
         });
         return handleResponse(response);
     },
 
     async createComment(postId, text) {
-        const response = await fetch(`${API_URL}/comment`, {
-            method: 'POST',
-            headers: getHeaders(),
-            body: JSON.stringify({ postId, text }),
-        });
-        return handleResponse(response);
+        try {
+            console.log('Intentando crear comentario:', { postId, text });
+
+            // Validación local
+            if (!text || !text.trim()) {
+                throw new Error('El texto del comentario es requerido');
+            }
+
+            const body = {
+                text: text.trim()
+            };
+
+            console.log('Datos a enviar:', body);
+
+            const response = await fetch(`${API_URL}/posts/${postId}/comments`, {
+                method: 'POST',
+                headers: {
+                    ...getHeaders(),
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify(body)
+            });
+
+            console.log('Respuesta del servidor:', {
+                status: response.status,
+                statusText: response.statusText
+            });
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                console.error('Error del servidor:', errorData);
+                try {
+                    const jsonError = JSON.parse(errorData);
+                    throw new Error(jsonError.message || 'Error al crear comentario');
+                } catch {
+                    throw new Error(`Error del servidor: ${errorData}`);
+                }
+            }
+
+            const data = await response.json();
+            console.log('Comentario creado correctamente:', data);
+            return data;
+        } catch (error) {
+            console.error('Error completo en createComment:', error);
+            throw error;
+        }
     },
 
     async deleteComment(postId, commentId) {
-        const response = await fetch(`${API_URL}/comment/${postId}/${commentId}`, {
-            method: 'DELETE',
-            headers: getHeaders(),
-        });
-        return handleResponse(response);
+        try {
+            console.log('Intentando eliminar comentario:', { postId, commentId });
+
+            const response = await fetch(`${API_URL}/comments/${commentId}`, {
+                method: 'DELETE',
+                headers: getHeaders(),
+                credentials: 'include'
+            });
+
+            console.log('Respuesta del servidor:', {
+                status: response.status,
+                statusText: response.statusText
+            });
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                console.error('Error del servidor:', errorData);
+                try {
+                    const jsonError = JSON.parse(errorData);
+                    throw new Error(jsonError.message || 'Error al eliminar comentario');
+                } catch {
+                    throw new Error(`Error del servidor: ${errorData}`);
+                }
+            }
+
+            const data = await response.json();
+            console.log('Comentario eliminado correctamente:', data);
+            return data;
+        } catch (error) {
+            console.error('Error completo en deleteComment:', error);
+            throw error;
+        }
     },
 
     // Users

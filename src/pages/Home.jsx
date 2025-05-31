@@ -73,7 +73,16 @@ export default function Home() {
 
         setIsSubmittingComment(prev => ({ ...prev, [postId]: true }))
         try {
-            const newComment = await api.createComment(postId, comments[postId])
+            console.log('Enviando comentario:', {
+                postId,
+                text: comments[postId],
+                commentState: comments
+            });
+
+            const newComment = await api.createComment(postId, comments[postId].trim())
+
+            console.log('Respuesta del servidor:', newComment);
+
             setPosts(prevPosts => prevPosts.map(post => {
                 if (post._id === postId) {
                     return {
