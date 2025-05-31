@@ -18,28 +18,46 @@ export default function ProfilePage() {
         const fetchProfileData = async () => {
             try {
                 // Si no hay userId en los parámetros, mostrar el perfil del usuario actual
-                const targetUserId = userId || currentUser._id
+                const targetUserId = userId || currentUser._id;
+                console.log('Información de perfil:', {
+                    urlUserId: userId,
+                    currentUserId: currentUser._id,
+                    targetUserId: targetUserId,
+                    isOwnProfile: !userId || userId === currentUser._id
+                });
 
-                // Si estamos viendo un perfil de otro usuario, obtener sus datos
-                if (userId) {
-                    const userData = await api.getUser(userId)
-                    setProfileUser(userData)
+                // Obtener datos del usuario
+                if (userId && userId !== currentUser._id) {
+                    const userData = await api.getUser(userId);
+                    console.log('Datos de usuario obtenidos:', userData);
+                    setProfileUser(userData);
                 } else {
-                    setProfileUser(currentUser)
+                    console.log('Usando datos del usuario actual:', currentUser);
+                    setProfileUser(currentUser);
                 }
 
-                const userPosts = await api.getUserPosts(targetUserId)
-                setPosts(userPosts)
+                // Obtener posts del usuario
+                console.log('Solicitando posts para:', targetUserId);
+                const userPosts = await api.getUserPosts(targetUserId);
+                console.log('Posts obtenidos:', {
+                    cantidad: userPosts.length,
+                    posts: userPosts.map(post => ({
+                        id: post._id,
+                        userId: post.user?._id,
+                        images: post.images?.length
+                    }))
+                });
+                setPosts(userPosts);
             } catch (err) {
-                console.error('Error detallado al cargar perfil:', err)
-                setError(err.message || 'Error al cargar el perfil')
+                console.error('Error detallado al cargar perfil:', err);
+                setError(err.message || 'Error al cargar el perfil');
             } finally {
-                setIsLoading(false)
+                setIsLoading(false);
             }
-        }
+        };
 
-        fetchProfileData()
-    }, [userId, currentUser])
+        fetchProfileData();
+    }, [userId, currentUser]);
 
     if (isLoading) {
         return (

@@ -21,7 +21,7 @@ export default function Home() {
 
     const fetchPosts = async () => {
         try {
-            const postsData = await api.getPosts()
+            const postsData = await api.getOrderedPosts()
             console.log('Posts recibidos del servidor:', postsData);
 
             // Asegurarnos de que cada post tenga los likes inicializados correctamente

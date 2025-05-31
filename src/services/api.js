@@ -418,28 +418,40 @@ export const api = {
 
     async getUserPosts(userId) {
         try {
+            if (!userId) {
+                throw new Error('Se requiere un ID de usuario para obtener sus posts');
+            }
+
             console.log('Intentando obtener posts del usuario con ID:', userId);
-            const response = await fetch(`${API_URL}/post?userId=${userId}`, {
-                headers: getHeaders(),
+            const response = await fetch(`${API_URL}/post`, {
+                headers: {
+                    ...getHeaders(),
+                    'Content-Type': 'application/json'
+                },
+                method: 'GET'
             });
 
             if (!response.ok) {
                 const errorData = await response.text();
-                console.error('Respuesta del servidor:', errorData);
+                console.error('Error en la respuesta del servidor:', errorData);
                 throw new Error('Error al obtener los posts del usuario');
             }
 
-            const data = await response.json();
-            console.log('Estructura de los posts recibidos:', data.map(post => ({
-                id: post._id,
-                caption: post.caption,
-                imageStructure: post.images && post.images[0] ?
-                    typeof post.images[0] === 'string' ?
-                        'URL directa' :
-                        Object.keys(post.images[0])
-                    : 'No hay imágenes'
-            })));
-            return data;
+            const allPosts = await response.json();
+            // Filtrar los posts por el usuario específico
+            const userPosts = allPosts.filter(post => post.user._id === userId);
+
+            console.log('Posts recibidos para el usuario:', {
+                userId,
+                totalPosts: allPosts.length,
+                postsDelUsuario: userPosts.length,
+                posts: userPosts.map(post => ({
+                    id: post._id,
+                    caption: post.caption,
+                    userId: post.user._id
+                }))
+            });
+            return userPosts;
         } catch (error) {
             console.error('Error en getUserPosts:', error);
             throw error;
@@ -464,6 +476,35 @@ export const api = {
             return data;
         } catch (error) {
             console.error('Error en getPost:', error);
+            throw error;
+        }
+    },
+
+    async getOrderedPosts() {
+        try {
+            console.log('Obteniendo posts ordenados...');
+            const response = await fetch(`${API_URL}/post/all`, {
+                headers: getHeaders(),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                console.error('Error en la respuesta del servidor:', errorData);
+                throw new Error('Error al obtener los posts');
+            }
+
+            const data = await response.json();
+            console.log('Posts recibidos del feed:', {
+                cantidad: data.length,
+                posts: data.map(post => ({
+                    id: post._id,
+                    userId: post.user._id,
+                    userName: post.user.fullName
+                }))
+            });
+            return data;
+        } catch (error) {
+            console.error('Error en getOrderedPosts:', error);
             throw error;
         }
     },
