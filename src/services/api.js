@@ -544,8 +544,8 @@ export const api = {
     async unfollowUser(userId) {
         try {
             console.log('Intentando dejar de seguir al usuario:', userId);
-            const response = await fetch(`${API_URL}/unfollow/${userId}`, {
-                method: 'POST',
+            const response = await fetch(`${API_URL}/follow/${userId}`, {
+                method: 'DELETE',
                 headers: getHeaders(),
             });
 
