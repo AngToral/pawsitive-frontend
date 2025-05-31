@@ -4,11 +4,14 @@ import { HiMagnifyingGlass, HiUser, HiPaperAirplane } from 'react-icons/hi2';
 import { ThreeDots } from 'react-loader-spinner';
 import io from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
+import { useNotification } from '../context/NotificationContext';
+import { Toaster } from 'react-hot-toast';
 
 const SOCKET_URL = import.meta.env.VITE_BACKEND || 'http://localhost:3000';
 
 export default function MessagesPage() {
     const { user } = useAuth();
+    const { showMessageNotification } = useNotification();
     const [conversations, setConversations] = useState([]);
     const [selectedConversation, setSelectedConversation] = useState(null);
     const [messages, setMessages] = useState([]);
@@ -70,9 +73,16 @@ export default function MessagesPage() {
         // Escuchar mensajes recibidos
         socketRef.current.on('receiveMessage', (message) => {
             console.log('Mensaje recibido:', message);
+
+            // Mostrar notificación solo si no estamos en la conversación actual
+            if (message.conversation !== selectedConversation) {
+                showMessageNotification(message, () => {
+                    setSelectedConversation(message.conversation);
+                });
+            }
+
             if (message.conversation === selectedConversation) {
                 setMessages(prev => {
-                    // Evitar duplicados
                     const isDuplicate = prev.some(m => m._id === message._id);
                     if (isDuplicate) {
                         console.log('Mensaje duplicado, ignorando');
@@ -103,7 +113,7 @@ export default function MessagesPage() {
                 socketRef.current.disconnect();
             }
         };
-    }, [user?._id, selectedConversation]);
+    }, [user?._id, selectedConversation, showMessageNotification]);
 
     // Scroll al último mensaje
     const scrollToBottom = () => {
@@ -252,6 +262,7 @@ export default function MessagesPage() {
 
     return (
         <div className="min-h-screen bg-white">
+            <Toaster />
             {/* Header */}
             <div className="border-b border-gray-200">
                 <div className="max-w-3xl mx-auto px-4 py-4">
