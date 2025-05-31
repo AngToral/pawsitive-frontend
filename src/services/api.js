@@ -483,8 +483,12 @@ export const api = {
     async getOrderedPosts() {
         try {
             console.log('Obteniendo posts ordenados...');
-            const response = await fetch(`${API_URL}/post/all`, {
-                headers: getHeaders(),
+            const response = await fetch(`${API_URL}/post`, {
+                headers: {
+                    ...getHeaders(),
+                    'Content-Type': 'application/json'
+                },
+                method: 'GET'
             });
 
             if (!response.ok) {
@@ -499,10 +503,15 @@ export const api = {
                 posts: data.map(post => ({
                     id: post._id,
                     userId: post.user._id,
-                    userName: post.user.fullName
+                    userName: post.user.fullName,
+                    fecha: post.createdAt
                 }))
             });
-            return data;
+
+            // Ordenar los posts: primero los más recientes
+            const sortedPosts = data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            return sortedPosts;
         } catch (error) {
             console.error('Error en getOrderedPosts:', error);
             throw error;

@@ -21,8 +21,17 @@ export default function Home() {
 
     const fetchPosts = async () => {
         try {
-            const postsData = await api.getOrderedPosts()
-            console.log('Posts recibidos del servidor:', postsData);
+            console.log('Obteniendo posts para el feed...');
+            const postsData = await api.getOrderedPosts();
+            console.log('Posts recibidos del servidor:', {
+                cantidad: postsData.length,
+                posts: postsData.map(post => ({
+                    id: post._id,
+                    userId: post.user._id,
+                    userName: post.user.fullName,
+                    fecha: post.createdAt
+                }))
+            });
 
             // Asegurarnos de que cada post tenga los likes inicializados correctamente
             const processedPosts = postsData.map(post => {
@@ -37,28 +46,31 @@ export default function Home() {
                     processedPost.likesCount = post.likes.length;
                 }
 
-                console.log('Post procesado:', {
-                    id: post._id,
-                    likes: processedPost.likes,
-                    likesCount: processedPost.likesCount
-                });
-
                 return processedPost;
             });
 
-            setPosts(processedPosts)
+            console.log('Posts procesados:', {
+                cantidad: processedPosts.length,
+                ejemplo: processedPosts[0] ? {
+                    id: processedPosts[0]._id,
+                    usuario: processedPosts[0].user.fullName,
+                    likes: processedPosts[0].likes.length
+                } : 'No hay posts'
+            });
+
+            setPosts(processedPosts);
             // Inicializar estados para comentarios
-            const commentsState = {}
+            const commentsState = {};
             processedPosts.forEach(post => {
-                commentsState[post._id] = ''
-            })
-            setComments(commentsState)
+                commentsState[post._id] = '';
+            });
+            setComments(commentsState);
         } catch (err) {
-            console.error(err)
+            console.error('Error al obtener posts:', err);
         } finally {
-            setIsLoading(false)
+            setIsLoading(false);
         }
-    }
+    };
 
     const handleUserClick = (userId) => {
         navigate(`/profile/${userId}`)
