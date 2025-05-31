@@ -2,16 +2,12 @@ import { useState, useEffect, useRef } from 'react';
 import { api } from '../services/api';
 import { HiMagnifyingGlass, HiUser, HiPaperAirplane } from 'react-icons/hi2';
 import { ThreeDots } from 'react-loader-spinner';
-import io from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
-import { useNotification } from '../context/NotificationContext';
-import { Toaster } from 'react-hot-toast';
 
 const SOCKET_URL = import.meta.env.VITE_BACKEND || 'http://localhost:3000';
 
 export default function MessagesPage() {
     const { user } = useAuth();
-    const { showMessageNotification } = useNotification();
     const [conversations, setConversations] = useState([]);
     const [selectedConversation, setSelectedConversation] = useState(null);
     const [messages, setMessages] = useState([]);
@@ -22,7 +18,6 @@ export default function MessagesPage() {
     const [error, setError] = useState(null);
     const [newMessage, setNewMessage] = useState('');
     const messagesEndRef = useRef(null);
-    const socketRef = useRef(null);
 
     // Cargar conversaciones al montar
     useEffect(() => {
@@ -35,85 +30,6 @@ export default function MessagesPage() {
             loadMessages(selectedConversation);
         }
     }, [selectedConversation]);
-
-    // Conectar socket al montar
-    useEffect(() => {
-        console.log('Iniciando conexión del socket...');
-        socketRef.current = io(SOCKET_URL, {
-            withCredentials: true,
-            transports: ['websocket']
-        });
-
-        // Eventos de conexión
-        socketRef.current.on('connect', () => {
-            console.log('Socket conectado exitosamente');
-
-            // Unirse con el userId cuando se conecta
-            if (user?._id) {
-                console.log('Enviando evento join con userId:', user._id);
-                socketRef.current.emit('join', user._id);
-            }
-        });
-
-        socketRef.current.on('connect_error', (error) => {
-            console.error('Error de conexión del socket:', error);
-        });
-
-        socketRef.current.on('disconnect', (reason) => {
-            console.log('Socket desconectado:', reason);
-            // Intentar reconectar si la desconexión no fue intencional
-            if (reason === 'io server disconnect' || reason === 'io client disconnect') {
-                console.log('Desconexión intencional, no reconectando');
-            } else {
-                console.log('Intentando reconectar...');
-                socketRef.current.connect();
-            }
-        });
-
-        // Escuchar mensajes recibidos
-        socketRef.current.on('receiveMessage', (message) => {
-            console.log('Mensaje recibido:', message);
-
-            // Mostrar notificación solo si no estamos en la conversación actual
-            if (message.conversation !== selectedConversation) {
-                showMessageNotification(message, () => {
-                    setSelectedConversation(message.conversation);
-                });
-            }
-
-            if (message.conversation === selectedConversation) {
-                setMessages(prev => {
-                    const isDuplicate = prev.some(m => m._id === message._id);
-                    if (isDuplicate) {
-                        console.log('Mensaje duplicado, ignorando');
-                        return prev;
-                    }
-                    const newMessages = [...prev, message];
-                    console.log('Actualizando mensajes:', newMessages);
-                    return newMessages;
-                });
-                scrollToBottom();
-            }
-
-            // Actualizar última mensaje en la lista de conversaciones
-            setConversations(prev => prev.map(conv => {
-                if (conv._id === message.conversation) {
-                    return {
-                        ...conv,
-                        lastMessage: message
-                    };
-                }
-                return conv;
-            }));
-        });
-
-        return () => {
-            if (socketRef.current) {
-                console.log('Limpiando conexión del socket');
-                socketRef.current.disconnect();
-            }
-        };
-    }, [user?._id, selectedConversation, showMessageNotification]);
 
     // Scroll al último mensaje
     const scrollToBottom = () => {
@@ -242,13 +158,7 @@ export default function MessagesPage() {
 
         try {
             setIsLoading(true);
-            // Enviamos por API primero
             const sentMessage = await api.sendMessage(selectedConversation, newMessage.trim());
-
-            // No necesitamos emitir el mensaje por socket porque el backend
-            // se encargará de emitir el evento receiveMessage a los destinatarios
-
-            // Actualizamos la UI con el mensaje enviado
             setMessages(prev => [...prev, sentMessage]);
             setNewMessage('');
             scrollToBottom();
@@ -262,7 +172,6 @@ export default function MessagesPage() {
 
     return (
         <div className="min-h-screen bg-white">
-            <Toaster />
             {/* Header */}
             <div className="border-b border-gray-200">
                 <div className="max-w-3xl mx-auto px-4 py-4">
