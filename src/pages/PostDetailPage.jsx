@@ -11,7 +11,6 @@ export default function PostDetailPage() {
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState(null)
     const [isLiked, setIsLiked] = useState(false)
-    const [likesCount, setLikesCount] = useState(0)
     const [comment, setComment] = useState('')
     const [isSubmittingComment, setIsSubmittingComment] = useState(false)
     const [isLiking, setIsLiking] = useState(false)
@@ -22,9 +21,21 @@ export default function PostDetailPage() {
         const fetchPost = async () => {
             try {
                 const postData = await api.getPost(postId)
-                setPost(postData)
-                setIsLiked(postData.isLiked)
-                setLikesCount(postData.likes?.length || 0)
+                console.log('Post recibido:', postData);
+
+                // Procesar el post para asegurar la consistencia de los likes
+                const processedPost = {
+                    ...postData,
+                    likes: Array.isArray(postData.likes) ? postData.likes : [],
+                    likesCount: 0
+                };
+
+                if (Array.isArray(postData.likes) && postData.likes.length > 0) {
+                    processedPost.likesCount = postData.likes.length;
+                }
+
+                setPost(processedPost)
+                setIsLiked(processedPost.likes.includes(user._id))
             } catch (err) {
                 setError('Error al cargar el post')
                 console.error(err)
@@ -36,23 +47,43 @@ export default function PostDetailPage() {
         if (postId) {
             fetchPost()
         }
-    }, [postId])
+    }, [postId, user._id])
 
     const handleUserClick = (userId) => {
         navigate(`/profile/${userId}`)
     }
 
     const handleLike = async () => {
-        if (isLiking) return
-        setIsLiking(true)
+        if (isLiking || !post) return;
+        setIsLiking(true);
+
+        // Determinar el nuevo estado
+        const hasLiked = post.likes?.includes(user._id);
+        const updatedLikes = hasLiked
+            ? (post.likes || []).filter(id => id !== user._id)
+            : [...(post.likes || []), user._id];
+
+        // Actualización optimista
+        setIsLiked(!hasLiked);
+        setPost(prev => ({
+            ...prev,
+            isLiked: !hasLiked,
+            likes: updatedLikes
+        }));
+
         try {
-            await api.likePost(postId)
-            setIsLiked(!isLiked)
-            setLikesCount(prev => isLiked ? prev - 1 : prev + 1)
+            await api.likePost(postId);
         } catch (error) {
-            console.error('Error al dar like:', error)
+            console.error('Error al dar like:', error);
+            // Revertir en caso de error
+            setIsLiked(hasLiked);
+            setPost(prev => ({
+                ...prev,
+                isLiked: hasLiked,
+                likes: post.likes
+            }));
         } finally {
-            setIsLiking(false)
+            setIsLiking(false);
         }
     }
 
@@ -215,12 +246,14 @@ export default function PostDetailPage() {
                     >
                         {isLiking ? (
                             <ThreeDots color="#0EA5E9" height={24} width={24} />
-                        ) : isLiked ? (
+                        ) : isLiked || (post.likes && post.likes.includes(user._id)) ? (
                             <HiHeart className="w-6 h-6" />
                         ) : (
                             <HiOutlineHeart className="w-6 h-6" />
                         )}
-                        <span>{likesCount}</span>
+                        {(post.likes?.length > 0) && (
+                            <span>{post.likes.length}</span>
+                        )}
                     </button>
                 </div>
 

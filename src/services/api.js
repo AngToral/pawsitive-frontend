@@ -184,7 +184,7 @@ export const api = {
     async likePost(postId) {
         try {
             console.log('Intentando dar like al post:', postId);
-            const response = await fetch(`${API_URL}/post/${postId}/like`, {
+            const response = await fetch(`${API_URL}/like/post/${postId}`, {
                 method: 'POST',
                 headers: {
                     ...getHeaders(),
@@ -213,8 +213,17 @@ export const api = {
             }
 
             const data = await response.json();
-            console.log('Like procesado correctamente:', data);
-            return data;
+            console.log('Like procesado correctamente. Datos recibidos:', {
+                data,
+                isLiked: data.isLiked,
+                likes: data.likes,
+                likesCount: data.likesCount
+            });
+            return {
+                isLiked: data.isLiked || false,
+                likes: data.likes || [],
+                likesCount: data.likesCount || 0
+            };
         } catch (error) {
             console.error('Error completo en likePost:', error);
             throw error;

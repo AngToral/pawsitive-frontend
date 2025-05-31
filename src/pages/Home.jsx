@@ -22,10 +22,34 @@ export default function Home() {
     const fetchPosts = async () => {
         try {
             const postsData = await api.getPosts()
-            setPosts(postsData)
+            console.log('Posts recibidos del servidor:', postsData);
+
+            // Asegurarnos de que cada post tenga los likes inicializados correctamente
+            const processedPosts = postsData.map(post => {
+                const processedPost = {
+                    ...post,
+                    likes: Array.isArray(post.likes) ? post.likes : [],
+                    likesCount: 0
+                };
+
+                // Solo establecer likesCount si hay likes
+                if (Array.isArray(post.likes) && post.likes.length > 0) {
+                    processedPost.likesCount = post.likes.length;
+                }
+
+                console.log('Post procesado:', {
+                    id: post._id,
+                    likes: processedPost.likes,
+                    likesCount: processedPost.likesCount
+                });
+
+                return processedPost;
+            });
+
+            setPosts(processedPosts)
             // Inicializar estados para comentarios
             const commentsState = {}
-            postsData.forEach(post => {
+            processedPosts.forEach(post => {
                 commentsState[post._id] = ''
             })
             setComments(commentsState)
@@ -45,25 +69,50 @@ export default function Home() {
     }
 
     const handleLike = async (postId) => {
-        if (isLiking[postId]) return
-        setIsLiking(prev => ({ ...prev, [postId]: true }))
+        // Prevenir múltiples clicks mientras se procesa
+        if (isLiking[postId]) return;
+
+        // Encontrar el post actual
+        const currentPost = posts.find(p => p._id === postId);
+        if (!currentPost) return;
+
+        setIsLiking(prev => ({ ...prev, [postId]: true }));
+
+        // Determinar el nuevo estado
+        const hasLiked = currentPost.likes?.includes(user._id);
+        const updatedLikes = hasLiked
+            ? (currentPost.likes || []).filter(id => id !== user._id)
+            : [...(currentPost.likes || []), user._id];
+
+        // Actualización optimista
+        setPosts(prevPosts => prevPosts.map(post => {
+            if (post._id === postId) {
+                return {
+                    ...post,
+                    isLiked: !hasLiked,
+                    likes: updatedLikes
+                };
+            }
+            return post;
+        }));
+
         try {
-            await api.likePost(postId)
+            await api.likePost(postId);
+        } catch (error) {
+            console.error('Error al dar like:', error);
+            // Revertir en caso de error
             setPosts(prevPosts => prevPosts.map(post => {
                 if (post._id === postId) {
-                    const wasLiked = post.isLiked
                     return {
                         ...post,
-                        isLiked: !wasLiked,
-                        likes: wasLiked ? post.likes - 1 : post.likes + 1
-                    }
+                        isLiked: hasLiked,
+                        likes: currentPost.likes
+                    };
                 }
-                return post
-            }))
-        } catch (error) {
-            console.error('Error al dar like:', error)
+                return post;
+            }));
         } finally {
-            setIsLiking(prev => ({ ...prev, [postId]: false }))
+            setIsLiking(prev => ({ ...prev, [postId]: false }));
         }
     }
 
@@ -219,12 +268,14 @@ export default function Home() {
                                     >
                                         {isLiking[post._id] ? (
                                             <ThreeDots color="#0EA5E9" height={24} width={24} />
-                                        ) : post.isLiked ? (
+                                        ) : post.isLiked || (post.likes && post.likes.includes(user._id)) ? (
                                             <HiHeart className="w-6 h-6" />
                                         ) : (
                                             <HiOutlineHeart className="w-6 h-6" />
                                         )}
-                                        <span>{post.likes}</span>
+                                        {(post.likes?.length > 0) && (
+                                            <span>{post.likes.length}</span>
+                                        )}
                                     </button>
 
                                     <button
