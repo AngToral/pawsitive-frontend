@@ -517,4 +517,79 @@ export const api = {
             throw error;
         }
     },
+
+    async followUser(userId) {
+        try {
+            console.log('Intentando seguir al usuario:', userId);
+            const response = await fetch(`${API_URL}/follow/${userId}`, {
+                method: 'POST',
+                headers: getHeaders(),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                console.error('Error al seguir usuario:', errorData);
+                throw new Error('Error al seguir al usuario');
+            }
+
+            const data = await response.json();
+            console.log('Respuesta follow:', data);
+            return data;
+        } catch (error) {
+            console.error('Error en followUser:', error);
+            throw error;
+        }
+    },
+
+    async unfollowUser(userId) {
+        try {
+            console.log('Intentando dejar de seguir al usuario:', userId);
+            const response = await fetch(`${API_URL}/unfollow/${userId}`, {
+                method: 'POST',
+                headers: getHeaders(),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                console.error('Error al dejar de seguir usuario:', errorData);
+                throw new Error('Error al dejar de seguir al usuario');
+            }
+
+            const data = await response.json();
+            console.log('Respuesta unfollow:', data);
+            return data;
+        } catch (error) {
+            console.error('Error en unfollowUser:', error);
+            throw error;
+        }
+    },
+
+    async getUserStats(userId) {
+        try {
+            console.log('Obteniendo estadísticas del usuario:', userId);
+            const response = await fetch(`${API_URL}/user/${userId}`, {
+                headers: getHeaders(),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                console.error('Error al obtener estadísticas:', errorData);
+                throw new Error('Error al obtener estadísticas del usuario');
+            }
+
+            const userData = await response.json();
+            console.log('Datos completos del usuario:', userData);
+
+            const stats = {
+                followers: userData.followersCount || 0,
+                following: userData.followingCount || 0
+            };
+
+            console.log('Estadísticas calculadas:', stats);
+            return stats;
+        } catch (error) {
+            console.error('Error en getUserStats:', error);
+            return { followers: 0, following: 0 };
+        }
+    },
 } 

@@ -112,13 +112,29 @@ export default function CreatePostPage() {
                     </div>
 
                     {previewUrls.length > 0 && (
-                        <div className="grid grid-cols-2 gap-4">
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(2, 1fr)',
+                            gap: '1rem',
+                            maxWidth: '400px',
+                            margin: '0 auto'
+                        }}>
                             {previewUrls.map((url, index) => (
-                                <div key={index} className="relative aspect-square rounded-lg overflow-hidden">
+                                <div key={index} style={{
+                                    position: 'relative',
+                                    width: '160px',
+                                    height: '160px',
+                                    borderRadius: '8px',
+                                    overflow: 'hidden'
+                                }}>
                                     <img
                                         src={url}
                                         alt={`Preview ${index + 1}`}
-                                        className="w-full h-full object-cover"
+                                        style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            objectFit: 'cover'
+                                        }}
                                     />
                                     <button
                                         type="button"
@@ -129,7 +145,21 @@ export default function CreatePostPage() {
                                             setPreviewUrls(newUrls)
                                             URL.revokeObjectURL(url)
                                         }}
-                                        className="absolute top-2 right-2 bg-black bg-opacity-50 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-opacity-70"
+                                        style={{
+                                            position: 'absolute',
+                                            top: '8px',
+                                            right: '8px',
+                                            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                                            color: 'white',
+                                            borderRadius: '50%',
+                                            width: '32px',
+                                            height: '32px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            cursor: 'pointer',
+                                            border: 'none'
+                                        }}
                                     >
                                         ×
                                     </button>
