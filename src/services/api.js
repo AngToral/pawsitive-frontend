@@ -457,7 +457,7 @@ export const api = {
 
     async sendMessage(conversationId, text) {
         try {
-            console.log('Enviando mensaje:', { conversationId, text });
+            console.log('Enviando mensaje:', { conversationId, content: text });
             const response = await fetch(`${API_URL}/message/send`, {
                 method: 'POST',
                 headers: {

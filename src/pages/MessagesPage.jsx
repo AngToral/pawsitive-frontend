@@ -3,10 +3,12 @@ import { api } from '../services/api';
 import { HiMagnifyingGlass, HiUser, HiPaperAirplane } from 'react-icons/hi2';
 import { ThreeDots } from 'react-loader-spinner';
 import io from 'socket.io-client';
+import { useAuth } from '../context/AuthContext';
 
 const SOCKET_URL = import.meta.env.VITE_BACKEND || 'http://localhost:3000';
 
 export default function MessagesPage() {
+    const { user } = useAuth();
     const [conversations, setConversations] = useState([]);
     const [selectedConversation, setSelectedConversation] = useState(null);
     const [messages, setMessages] = useState([]);
@@ -33,18 +35,63 @@ export default function MessagesPage() {
 
     // Conectar socket al montar
     useEffect(() => {
-        socketRef.current = io(SOCKET_URL);
+        console.log('Iniciando conexión del socket...');
+        socketRef.current = io(SOCKET_URL, {
+            withCredentials: true,
+            transports: ['websocket']
+        });
 
-        socketRef.current.on('message', (message) => {
+        // Eventos de conexión
+        socketRef.current.on('connect', () => {
+            console.log('Socket conectado exitosamente');
+
+            // Unirse con el userId cuando se conecta
+            if (user?._id) {
+                console.log('Enviando evento join con userId:', user._id);
+                socketRef.current.emit('join', user._id);
+            }
+        });
+
+        socketRef.current.on('connect_error', (error) => {
+            console.error('Error de conexión del socket:', error);
+        });
+
+        socketRef.current.on('disconnect', (reason) => {
+            console.log('Socket desconectado:', reason);
+            // Intentar reconectar si la desconexión no fue intencional
+            if (reason === 'io server disconnect' || reason === 'io client disconnect') {
+                console.log('Desconexión intencional, no reconectando');
+            } else {
+                console.log('Intentando reconectar...');
+                socketRef.current.connect();
+            }
+        });
+
+        // Escuchar mensajes recibidos
+        socketRef.current.on('receiveMessage', (message) => {
             console.log('Mensaje recibido:', message);
-            if (message.conversationId === selectedConversation) {
-                setMessages(prev => [...prev, message]);
+            if (message.conversation === selectedConversation) {
+                setMessages(prev => {
+                    // Evitar duplicados
+                    const isDuplicate = prev.some(m => m._id === message._id);
+                    if (isDuplicate) {
+                        console.log('Mensaje duplicado, ignorando');
+                        return prev;
+                    }
+                    const newMessages = [...prev, message];
+                    console.log('Actualizando mensajes:', newMessages);
+                    return newMessages;
+                });
                 scrollToBottom();
             }
+
             // Actualizar última mensaje en la lista de conversaciones
             setConversations(prev => prev.map(conv => {
-                if (conv._id === message.conversationId) {
-                    return { ...conv, lastMessage: message };
+                if (conv._id === message.conversation) {
+                    return {
+                        ...conv,
+                        lastMessage: message
+                    };
                 }
                 return conv;
             }));
@@ -52,10 +99,11 @@ export default function MessagesPage() {
 
         return () => {
             if (socketRef.current) {
+                console.log('Limpiando conexión del socket');
                 socketRef.current.disconnect();
             }
         };
-    }, [selectedConversation]);
+    }, [user?._id, selectedConversation]);
 
     // Scroll al último mensaje
     const scrollToBottom = () => {
@@ -184,14 +232,16 @@ export default function MessagesPage() {
 
         try {
             setIsLoading(true);
-            const response = await api.sendMessage(selectedConversation, newMessage.trim());
-            setMessages(prev => [...prev, response]);
+            // Enviamos por API primero
+            const sentMessage = await api.sendMessage(selectedConversation, newMessage.trim());
+
+            // No necesitamos emitir el mensaje por socket porque el backend
+            // se encargará de emitir el evento receiveMessage a los destinatarios
+
+            // Actualizamos la UI con el mensaje enviado
+            setMessages(prev => [...prev, sentMessage]);
             setNewMessage('');
-            // Emitir el mensaje a través del socket
-            socketRef.current.emit('sendMessage', {
-                conversationId: selectedConversation,
-                text: newMessage.trim()
-            });
+            scrollToBottom();
         } catch (err) {
             console.error('Error al enviar mensaje:', err);
             setError('Error al enviar el mensaje');
@@ -320,7 +370,7 @@ export default function MessagesPage() {
                                             {messages.map(message => (
                                                 <div
                                                     key={message._id}
-                                                    className={`p-3 rounded-lg ${message.sender === 'me'
+                                                    className={`p-3 rounded-lg ${message.sender._id === user?._id
                                                         ? 'bg-blue-500 text-white ml-auto'
                                                         : 'bg-gray-100'
                                                         } max-w-[70%]`}
