@@ -35,50 +35,44 @@ export default function Navbar() {
     ]
 
     return (
-        <nav className="fixed left-0 top-0 w-64 h-screen border-r border-gray-200 bg-white">
-            <div className="px-6 py-8">
-                <Link to="/" className="block">
-                    <h1 className="text-2xl font-bold text-primary-500">Pawsitive</h1>
-                </Link>
-            </div>
-
-            <div className="px-3 space-y-1">
-                {menuItems.map((item, index) => (
-                    <Link
-                        key={index}
-                        to={item.path}
-                        className={`flex items-center px-3 py-3 text-base rounded-lg transition-colors ${location.pathname === item.path ? 'font-bold' : 'hover:bg-gray-100'}`}
-                    >
-                        <span className={location.pathname === item.path ? 'text-gray-900' : 'text-gray-500'}>
-                            {item.icon}
-                        </span>
-                        <span className="ml-4">{item.label}</span>
-                    </Link>
-                ))}
-
-                <Link
-                    to="/profile"
-                    className={`flex items-center px-3 py-3 text-base rounded-lg transition-colors ${location.pathname === '/profile' ? 'font-bold' : 'hover:bg-gray-100'}`}
-                >
+        <nav className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 md:top-0 md:left-0 md:w-64 md:h-screen md:border-r md:border-t-0">
+            <div className="flex flex-row justify-around md:flex-col md:justify-start md:h-full md:p-4">
+                <Link to="/profile" className="flex items-center px-3 py-3 text-base rounded-lg transition-colors hover:bg-gray-100">
                     {user?.profilePicture ? (
                         <img
-                            src={`${user.profilePicture}?${new Date().getTime()}`}
-                            alt={user?.fullName}
-                            style={{ height: '30px', width: '30px', borderRadius: '50%', objectFit: 'cover' }}
-                            className="aspect-square"
+                            src={user.profilePicture}
+                            alt={user.fullName}
+                            style={{
+                                height: '30px',
+                                width: '30px',
+                                borderRadius: '50%',
+                                objectFit: 'cover'
+                            }}
                         />
                     ) : (
                         <HiUser style={{ width: '25px', height: '25px' }} className="text-gray-500" />
                     )}
-                    <span className="ml-4">Perfil</span>
+                    <span className="ml-4 hidden md:block">Perfil</span>
                 </Link>
+
+                {menuItems.map((item, index) => (
+                    <Link
+                        key={index}
+                        to={item.path}
+                        className={`flex items-center px-3 py-3 text-base rounded-lg transition-colors hover:bg-gray-100 ${location.pathname === item.path ? 'text-primary-500' : 'text-gray-500'
+                            }`}
+                    >
+                        {item.icon}
+                        <span className="ml-4 hidden md:block">{item.label}</span>
+                    </Link>
+                ))}
 
                 <button
                     onClick={logout}
                     className="flex items-center px-3 py-3 text-base rounded-lg transition-colors hover:bg-gray-100 w-full text-left text-gray-500"
                 >
                     <HiArrowRightOnRectangle className="w-6 h-6" />
-                    <span className="ml-4">Cerrar sesión</span>
+                    <span className="ml-4 hidden md:block">Cerrar sesión</span>
                 </button>
             </div>
         </nav>

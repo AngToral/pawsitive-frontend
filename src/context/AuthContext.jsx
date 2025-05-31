@@ -93,13 +93,10 @@ export function AuthProvider({ children }) {
                     throw new Error('El token no contiene el ID del usuario');
                 }
 
-                // Establecer el usuario directamente desde la respuesta
-                if (response.user) {
-                    setUser(response.user);
-                } else {
-                    // Si por alguna razón no viene el usuario en la respuesta, lo obtenemos
-                    await fetchUserData(decoded._id);
-                }
+                // Obtener los datos completos del usuario
+                const userData = await api.getUser(decoded._id);
+                console.log('Datos completos del usuario:', userData);
+                setUser(userData);
 
                 return true
             } catch (decodeError) {
