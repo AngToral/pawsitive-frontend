@@ -139,7 +139,7 @@ export default function PostDetailPage() {
     if (!post) return null
 
     return (
-        <div className="min-h-screen bg-white">
+        <div className="w-full">
             {/* Header */}
             <div style={{
                 borderBottom: '1px solid #e5e7eb',
@@ -229,7 +229,7 @@ export default function PostDetailPage() {
                             alt={`Imagen ${index + 1} del post`}
                             style={{
                                 width: '100%',
-                                maxHeight: '600px',
+                                maxHeight: '500px',
                                 objectFit: 'cover',
                                 marginBottom: index < post.images.length - 1 ? '4px' : '0'
                             }}
@@ -284,7 +284,7 @@ export default function PostDetailPage() {
                                                 width: '32px',
                                                 height: '32px',
                                                 borderRadius: '50%',
-                                                objectFit: 'cover'
+                                                objectFit: 'contain'
                                             }}
                                         />
                                     ) : (
@@ -303,7 +303,7 @@ export default function PostDetailPage() {
                                 </div>
                                 <div style={{ flex: 1 }}>
                                     <div style={{
-                                        backgroundColor: '#f3f4f6',
+                                        backgroundColor: '#000',
                                         borderRadius: '16px',
                                         padding: '0.5rem 1rem'
                                     }}>
