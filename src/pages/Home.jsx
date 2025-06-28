@@ -215,7 +215,7 @@ export default function Home() {
                                                     key={index}
                                                     src={imageUrl}
                                                     alt={`Post image ${index + 1}`}
-                                                    className="w-full object-contain rounded-lg"
+                                                    className="w-full object-contain rounded-lg cursor-pointer"
                                                     style={{
                                                         height: post.images.length === 1 ? '256px' : '160px'
                                                     }}
