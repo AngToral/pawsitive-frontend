@@ -171,7 +171,7 @@ export default function MessagesPage() {
     };
 
     return (
-        <div className="min-h-screen bg-white">
+        <div className="min-h-screen">
             {/* Header */}
             <div className="border-b border-gray-200">
                 <div className="max-w-3xl mx-auto px-4 py-4">
@@ -249,12 +249,12 @@ export default function MessagesPage() {
                                 key={conv._id}
                                 onClick={() => setSelectedConversation(conv._id)}
                                 className={`p-3 rounded-lg cursor-pointer ${selectedConversation === conv._id
-                                    ? 'bg-blue-50'
-                                    : 'hover:bg-gray-50'
+                                    ? 'bg-gray-600'
+                                    : 'hover:bg-gray-700'
                                     }`}
                             >
                                 <p className="font-medium">{conv.participants[0].username}</p>
-                                <p className="text-sm text-gray-500 truncate">
+                                <p className="text-sm truncate">
                                     {conv.lastMessage?.content || 'No hay mensajes'}
                                 </p>
                             </div>
@@ -291,8 +291,8 @@ export default function MessagesPage() {
                                                 <div
                                                     key={message._id}
                                                     className={`p-3 rounded-lg ${message.sender._id === user?._id
-                                                        ? 'bg-blue-500 text-white ml-auto'
-                                                        : 'bg-gray-100'
+                                                        ? 'bg-pink-800 text-white ml-auto'
+                                                        : 'bg-black'
                                                         } max-w-[70%]`}
                                                 >
                                                     <p>{message.content}</p>
