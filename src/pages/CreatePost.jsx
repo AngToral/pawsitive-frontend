@@ -74,7 +74,7 @@ export default function CreatePostPage() {
     }
 
     return (
-        <div className="min-h-screen bg-white">
+        <div className="w-full h-screen">
             {/* Header */}
             <div className="border-b border-gray-200">
                 <div className="max-w-3xl mx-auto px-4 py-4 flex justify-between items-center">
@@ -91,7 +91,7 @@ export default function CreatePostPage() {
                         </div>
                     )}
 
-                    <div className="flex items-start space-x-4">
+                    <div className="flex items-start space-x-4 mb-6">
                         {user?.profilePicture ? (
                             <img
                                 src={`${user.profilePicture}?${new Date().getTime()}`}
