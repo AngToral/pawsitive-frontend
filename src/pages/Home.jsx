@@ -181,16 +181,16 @@ export default function Home() {
                                 <div className="flex items-center space-x-3">
                                     <div
                                         onClick={() => handleUserClick(post.user._id)}
-                                        style={{ cursor: 'pointer' }}
+                                        className='cursor-pointer flex items-center space-x-2'
                                     >
                                         {post.user.profilePicture && (
                                             <img
                                                 src={`${post.user.profilePicture}?${new Date().getTime()}`}
                                                 alt={post.user.fullName}
-                                                style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
-                                            //className="w-20 h-20 rounded-full object-cover"
+                                                className="w-16 h-16 rounded-full object-cover"
                                             />
                                         )}
+                                        <p>{post.user.username}</p>
                                     </div>
                                     <div>
                                         <h3
@@ -205,9 +205,6 @@ export default function Home() {
                                     </div>
                                 </div>
 
-                                {/* Contenido del post */}
-                                <p className="mt-3">{post.caption}</p>
-
                                 {/* Imágenes */}
                                 {post.images && post.images.length > 0 && (
                                     <div className={`mt-3 grid gap-2 ${post.images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
@@ -218,7 +215,7 @@ export default function Home() {
                                                     key={index}
                                                     src={imageUrl}
                                                     alt={`Post image ${index + 1}`}
-                                                    className="w-full object-cover rounded-lg"
+                                                    className="w-full object-contain rounded-lg"
                                                     style={{
                                                         height: post.images.length === 1 ? '256px' : '160px'
                                                     }}
@@ -232,6 +229,9 @@ export default function Home() {
                                         })}
                                     </div>
                                 )}
+
+                                {/* Contenido del post */}
+                                <p className="mt-3">{post.caption}</p>
 
                                 {/* Acciones */}
                                 <div className="mt-4 flex items-center space-x-4 text-gray-500">
