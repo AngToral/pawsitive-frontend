@@ -28,13 +28,14 @@ export default function Login() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen flex items-center justify-center bg-black py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full space-y-8">
-                <div>
+                <div className='flex flex-col items-center'>
+                    <img src="/Daisy.png" alt="logo-pawsitive" className='w-40 mb-4' />
                     <h1 className="text-4xl font-bold text-center text-primary-500">
                         Pawsitive
                     </h1>
-                    <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                    <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-500">
                         Inicia sesión en tu cuenta
                     </h2>
                     <p className="mt-2 text-center text-sm text-gray-600">
