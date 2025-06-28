@@ -71,8 +71,8 @@ export default function NotificationsPage() {
                             key={notification._id}
                             onClick={() => handleNotificationClick(notification)}
                             className={`p-4 rounded-lg shadow cursor-pointer transition-colors
-                                ${notification.read ? 'bg-white' : 'bg-blue-50'}
-                                hover:bg-gray-50`}
+                                ${notification.read ? 'bg-black' : 'bg-blue-50'}
+                                hover:bg-gray-500`}
                         >
                             <div className="flex items-center gap-3">
                                 <img
@@ -88,7 +88,7 @@ export default function NotificationsPage() {
                                         </span>{' '}
                                         {getNotificationText(notification)}
                                     </p>
-                                    <p className="text-xs text-gray-500 mt-1">
+                                    <p className="text-xs mt-1">
                                         {formatDistanceToNow(new Date(notification.createdAt), {
                                             addSuffix: true,
                                             locale: es
