@@ -166,7 +166,7 @@ export default function ProfilePage() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-white flex items-center justify-center">
+            <div className="min-h-screen flex items-center justify-center">
                 <ThreeDots color="#0EA5E9" height={50} width={50} />
             </div>
         )
@@ -175,13 +175,13 @@ export default function ProfilePage() {
     if (!profileUser) return null
 
     return (
-        <div className="min-h-screen bg-white">
+        <div className="min-h-screen">
             {/* Header del perfil */}
             <div className="max-w-4xl mx-auto px-4 py-8">
                 <div className="flex items-start space-x-8">
                     {/* Foto de perfil */}
                     <div className="flex-shrink-0">
-                        {profileUser?.profilePicture ? (
+                        {profileUser?.profilePicture && (
                             <img
                                 src={`${profileUser.profilePicture}?${new Date().getTime()}`}
                                 alt={profileUser.fullName}
@@ -192,26 +192,18 @@ export default function ProfilePage() {
                                     objectFit: 'cover',
                                     border: '2px solid #e5e7eb'
                                 }}
+                                className='shadow-md hover:shadow-lg transition-shadow duration-200 ease-in-out'
                             />
-                        ) : (
-                            <div style={{
-                                width: '96px',
-                                height: '96px',
-                                borderRadius: '50%',
-                                backgroundColor: '#f3f4f6',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}>
-                                <HiUser style={{ width: '48px', height: '48px', color: '#9ca3af' }} />
-                            </div>
                         )}
                     </div>
 
                     {/* Información del perfil */}
                     <div className="flex-1">
-                        <div className="flex items-center space-x-4 mb-4">
-                            <h1 className="text-2xl font-bold">{profileUser.fullName}</h1>
+                        <div className="flex items-center space-x-8 mb-4">
+                            <div className="flex flex-col space-x-4">
+                                <h1 className="text-2xl font-bold">{profileUser.fullName}</h1>
+                                <p>{profileUser.username}</p>
+                            </div>
                             {userId && userId !== currentUser._id ? (
                                 <button
                                     onClick={handleFollowToggle}
@@ -275,8 +267,8 @@ export default function ProfilePage() {
                         </div>
                     ) : posts.length > 0 ? (
                         <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(3, 1fr)',
+                            display: 'flex',
+                            flexWrap: 'wrap',
                             gap: '1rem',
                             maxWidth: '1200px',
                             margin: '0 auto',
@@ -286,7 +278,7 @@ export default function ProfilePage() {
                                     key={post._id}
                                     style={{
                                         aspectRatio: '1/1',
-                                        width: '100%',
+                                        width: '30%',
                                         position: 'relative',
                                         cursor: 'pointer'
                                     }}
@@ -295,11 +287,7 @@ export default function ProfilePage() {
                                     <img
                                         src={post.images[0].url || post.images[0]}
                                         alt={post.caption || `Post de ${profileUser.fullName}`}
-                                        style={{
-                                            width: '100%',
-                                            height: '100%',
-                                            objectFit: 'cover'
-                                        }}
+                                        className='w-full h-full object-contain'
                                     />
                                 </div>
                             ))}
@@ -311,6 +299,6 @@ export default function ProfilePage() {
                     )}
                 </div>
             </div>
-        </div>
+        </div >
     )
 }
