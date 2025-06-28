@@ -223,7 +223,7 @@ export default function ProfilePage() {
                                     )}
                                 </button>
                             ) : !userId && (
-                                <button className="flex items-center space-x-2 px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">
+                                <button className="flex items-center space-x-2 px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-500">
                                     <HiPencil className="w-4 h-4" />
                                     <span>Editar perfil</span>
                                 </button>

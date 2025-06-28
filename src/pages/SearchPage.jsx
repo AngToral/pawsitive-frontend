@@ -96,7 +96,7 @@ export default function SearchPage() {
     };
 
     return (
-        <div className="min-h-screen bg-white">
+        <div className="h-screen">
             {/* Header */}
             <div className="border-b border-gray-200">
                 <div className="max-w-3xl mx-auto px-4 py-4">
@@ -135,7 +135,7 @@ export default function SearchPage() {
                                 <div
                                     key={user._id}
                                     onClick={() => navigate(`/profile/${user._id}`)}
-                                    className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+                                    className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 bg-gray-300 cursor-pointer"
                                 >
                                     {user.profilePicture ? (
                                         <img
@@ -145,7 +145,7 @@ export default function SearchPage() {
                                                 width: '48px',
                                                 height: '48px',
                                                 borderRadius: '50%',
-                                                objectFit: 'cover'
+                                                objectFit: 'contain'
                                             }}
                                         />
                                     ) : (
