@@ -21,17 +21,7 @@ export default function Home() {
 
     const fetchPosts = async () => {
         try {
-            console.log('Obteniendo posts para el feed...');
             const postsData = await api.getOrderedPosts();
-            console.log('Posts recibidos del servidor:', {
-                cantidad: postsData.length,
-                posts: postsData.map(post => ({
-                    id: post._id,
-                    userId: post.user._id,
-                    userName: post.user.fullName,
-                    fecha: post.createdAt
-                }))
-            });
 
             // Asegurarnos de que cada post tenga los likes inicializados correctamente
             const processedPosts = postsData.map(post => {
@@ -47,15 +37,6 @@ export default function Home() {
                 }
 
                 return processedPost;
-            });
-
-            console.log('Posts procesados:', {
-                cantidad: processedPosts.length,
-                ejemplo: processedPosts[0] ? {
-                    id: processedPosts[0]._id,
-                    usuario: processedPosts[0].user.fullName,
-                    likes: processedPosts[0].likes.length
-                } : 'No hay posts'
             });
 
             setPosts(processedPosts);
@@ -134,15 +115,7 @@ export default function Home() {
 
         setIsSubmittingComment(prev => ({ ...prev, [postId]: true }))
         try {
-            console.log('Enviando comentario:', {
-                postId,
-                text: comments[postId],
-                commentState: comments
-            });
-
             const newComment = await api.createComment(postId, comments[postId].trim())
-
-            console.log('Respuesta del servidor:', newComment);
 
             setPosts(prevPosts => prevPosts.map(post => {
                 if (post._id === postId) {
@@ -202,7 +175,7 @@ export default function Home() {
             ) : (
                 <div className="space-y-6">
                     {posts.map(post => (
-                        <div key={post._id} className="bg-white rounded-lg shadow">
+                        <div key={post._id} className="">
                             <div className="p-4">
                                 {/* Cabecera del post */}
                                 <div className="flex items-center space-x-3">
@@ -210,24 +183,13 @@ export default function Home() {
                                         onClick={() => handleUserClick(post.user._id)}
                                         style={{ cursor: 'pointer' }}
                                     >
-                                        {post.user.profilePicture ? (
+                                        {post.user.profilePicture && (
                                             <img
                                                 src={`${post.user.profilePicture}?${new Date().getTime()}`}
                                                 alt={post.user.fullName}
                                                 style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+                                            //className="w-20 h-20 rounded-full object-cover"
                                             />
-                                        ) : (
-                                            <div style={{
-                                                width: '40px',
-                                                height: '40px',
-                                                borderRadius: '50%',
-                                                backgroundColor: '#f3f4f6',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center'
-                                            }}>
-                                                <HiUser style={{ width: '24px', height: '24px', color: '#9ca3af' }} />
-                                            </div>
                                         )}
                                     </div>
                                     <div>

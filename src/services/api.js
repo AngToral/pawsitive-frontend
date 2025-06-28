@@ -603,15 +603,6 @@ export const api = {
             }
 
             const data = await response.json();
-            console.log('Posts recibidos del feed:', {
-                cantidad: data.length,
-                posts: data.map(post => ({
-                    id: post._id,
-                    userId: post.user._id,
-                    userName: post.user.fullName,
-                    fecha: post.createdAt
-                }))
-            });
 
             // Ordenar los posts: primero los más recientes
             const sortedPosts = data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
