@@ -287,7 +287,7 @@ export default function ProfilePage() {
                                     <img
                                         src={post.images[0].url || post.images[0]}
                                         alt={post.caption || `Post de ${profileUser.fullName}`}
-                                        className='w-full h-full object-contain'
+                                        className='w-full h-full object-cover'
                                     />
                                 </div>
                             ))}
