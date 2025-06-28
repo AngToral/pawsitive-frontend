@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 import { useNavigate } from 'react-router-dom';
@@ -10,7 +10,7 @@ const SOCKET_URL = import.meta.env.VITE_BACKEND || 'http://localhost:3000';
 
 export default function Layout({ children }) {
     const { user } = useAuth();
-    const { showMessageNotification } = useNotification();
+    const { showMessageNotification, showNotification, fetchNotifications } = useNotification();
     const navigate = useNavigate();
     const socketRef = useRef(null);
 
@@ -57,13 +57,43 @@ export default function Layout({ children }) {
             });
         });
 
+        // Escuchar notificaciones de likes
+        socketRef.current.on('postLiked', (notification) => {
+            console.log('Notificación de like recibida:', notification);
+            showNotification(notification, () => {
+                navigate(`/post/${notification.post}`);
+            });
+            fetchNotifications();
+        });
+
+        // Escuchar notificaciones de comentarios
+        socketRef.current.on('postCommented', (notification) => {
+            console.log('Notificación de comentario recibida:', notification);
+            showNotification(notification, () => {
+                navigate(`/post/${notification.post}`);
+            });
+            fetchNotifications();
+        });
+
+        // Escuchar notificaciones de nuevos seguidores
+        socketRef.current.on('newFollower', (notification) => {
+            console.log('Notificación de nuevo seguidor recibida:', notification);
+            showNotification(notification, () => {
+                navigate(`/profile/${notification.sender._id}`);
+            });
+            fetchNotifications();
+        });
+
+        // Suscribirse a notificaciones
+        socketRef.current.emit('subscribeToNotifications', user._id);
+
         return () => {
             if (socketRef.current) {
                 console.log('Limpiando conexión del socket');
                 socketRef.current.disconnect();
             }
         };
-    }, [user?._id, showMessageNotification, navigate]);
+    }, [user?._id, showMessageNotification, showNotification, navigate, fetchNotifications]);
 
     return (
         <div className="flex">

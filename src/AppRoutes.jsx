@@ -1,3 +1,4 @@
+import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -7,6 +8,7 @@ import PostDetailPage from './pages/PostDetailPage';
 import CreatePostPage from './pages/CreatePost';
 import SearchPage from './pages/SearchPage';
 import MessagesPage from './pages/MessagesPage';
+import NotificationsPage from './pages/NotificationsPage';
 import PrivateRoute from './components/PrivateRoute';
 import Layout from './components/Layout';
 
@@ -61,6 +63,13 @@ export default function AppRoutes() {
                 <PrivateRoute>
                     <Layout>
                         <MessagesPage />
+                    </Layout>
+                </PrivateRoute>
+            } />
+            <Route path="/notifications" element={
+                <PrivateRoute>
+                    <Layout>
+                        <NotificationsPage />
                     </Layout>
                 </PrivateRoute>
             } />

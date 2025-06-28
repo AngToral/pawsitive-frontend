@@ -387,7 +387,41 @@ export const api = {
     // Notifications
     async getNotifications() {
         const response = await fetch(`${API_URL}/notification`, {
+            headers: getHeaders()
+        });
+        return handleResponse(response);
+    },
+
+    async markNotificationsAsRead(notificationIds = null) {
+        try {
+            console.log('Marcando notificaciones como leídas:', { notificationIds });
+
+            const response = await fetch(`${API_URL}/notification/read`, {
+                method: 'PUT',
+                headers: getHeaders(),
+                body: JSON.stringify({
+                    notificationIds: notificationIds ? Array.isArray(notificationIds) ? notificationIds : [notificationIds] : null
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Error del servidor:', errorData);
+                throw new Error(errorData.message || 'Error al marcar notificaciones como leídas');
+            }
+
+            return response.json();
+        } catch (error) {
+            console.error('Error completo:', error);
+            throw error;
+        }
+    },
+
+    async deleteNotifications(notificationIds = null) {
+        const response = await fetch(`${API_URL}/notification`, {
+            method: 'DELETE',
             headers: getHeaders(),
+            body: JSON.stringify({ notificationIds })
         });
         return handleResponse(response);
     },
