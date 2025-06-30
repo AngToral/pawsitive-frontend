@@ -115,7 +115,7 @@ export default function NotificationsPage() {
                                     key={notification._id}
                                     onClick={() => handleNotificationClick(notification)}
                                     className={`p-4 rounded-lg shadow cursor-pointer transition-colors
-                                        ${notification.read ? 'bg-gray-600' : 'bg-blue-50'}
+                                        ${notification.read ? 'bg-gray-600' : 'bg-pink-800'}
                                         hover:bg-gray-400`}
                                 >
                                     <div className="flex items-center gap-3">
