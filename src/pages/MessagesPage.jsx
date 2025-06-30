@@ -248,8 +248,8 @@ export default function MessagesPage() {
                             <div
                                 key={conv._id}
                                 onClick={() => setSelectedConversation(conv._id)}
-                                className={`p-3 rounded-lg cursor-pointer ${selectedConversation === conv._id
-                                    ? 'bg-gray-600'
+                                className={`p-3 rounded-lg cursor-pointer border-2 border-solid border-gray-200 ${selectedConversation === conv._id
+                                    ? 'border-gray-200'
                                     : 'hover:bg-gray-700'
                                     }`}
                             >
