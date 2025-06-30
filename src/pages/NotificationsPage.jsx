@@ -115,14 +115,14 @@ export default function NotificationsPage() {
                                     key={notification._id}
                                     onClick={() => handleNotificationClick(notification)}
                                     className={`p-4 rounded-lg shadow cursor-pointer transition-colors
-                                        ${notification.read ? 'bg-gray-100' : 'bg-blue-50'}
-                                        hover:bg-gray-200`}
+                                        ${notification.read ? 'bg-gray-600' : 'bg-blue-50'}
+                                        hover:bg-gray-400`}
                                 >
                                     <div className="flex items-center gap-3">
                                         <img
                                             src={notification.sender.profilePicture}
                                             alt={notification.sender.username}
-                                            className="w-10 h-10 rounded-full object-cover"
+                                            className="w-10 h-10 rounded-full object-contain"
                                             style={{ height: '50px' }}
                                         />
                                         <div className="flex-1">
