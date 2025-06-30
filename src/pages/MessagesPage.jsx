@@ -72,7 +72,7 @@ export default function MessagesPage() {
         try {
             setIsLoading(true);
             const results = await api.searchMessages(selectedConversation, messageSearchTerm.trim());
-            setMessages(results.messages);
+            setMessages(results);
         } catch (err) {
             console.error('Error al buscar mensajes:', err);
             setError('Error al buscar mensajes');
@@ -287,7 +287,10 @@ export default function MessagesPage() {
                                         </div>
                                     ) : (
                                         <div className="space-y-4">
-                                            {messages.map(message => (
+                                            {Array.isArray(messages) && messages.length === 0 && messageSearchTerm && (
+                                                <div className="text-center text-gray-500 py-8">No se encontraron mensajes</div>
+                                            )}
+                                            {Array.isArray(messages) && messages.map(message => (
                                                 <div
                                                     key={message._id}
                                                     className={`p-3 rounded-lg ${message.sender._id === user?._id

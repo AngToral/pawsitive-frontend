@@ -751,21 +751,9 @@ export const api = {
             console.log('Respuesta de búsqueda de mensajes:', {
                 término: searchTerm,
                 conversación: conversationId,
-                resultados: data.map(message => ({
-                    id: message._id,
-                    text: message.text,
-                    sender: message.sender,
-                    createdAt: message.createdAt,
-                    matchType: 'text'
-                }))
+                resultados: data.messages
             });
-
-            // Filtrar los resultados localmente también para asegurar precisión
-            const filteredData = data.filter(message =>
-                message.text.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-
-            return filteredData;
+            return data.messages;
         } catch (error) {
             console.error('Error en searchMessages:', error);
             throw error;
