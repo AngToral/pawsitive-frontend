@@ -295,7 +295,7 @@ export default function Home() {
                                                         )}
                                                     </div>
                                                     <div className="flex-1">
-                                                        <div className="bg-gray-100 rounded-2xl px-4 py-2">
+                                                        <div className="bg-[#1a1a1a] rounded-2xl px-4 py-2">
                                                             <h4
                                                                 onClick={() => handleUserClick(comment.user._id)}
                                                                 className="font-semibold cursor-pointer hover:underline"
