@@ -379,7 +379,8 @@ export default function Home() {
                     borderRadius: '50%',
                     border: 'none',
                     fontSize: '24px',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    padding: '40px'
                 }}
             >
                 🐾
