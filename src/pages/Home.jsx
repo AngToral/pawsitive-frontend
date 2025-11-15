@@ -402,7 +402,17 @@ export default function Home() {
                     }}
                 >
                     <p>{fact}</p>
-                    <button onClick={() => setShowPopup(false)}>Cerrar</button>
+                    <button
+                        onClick={() => setShowPopup(false)}
+                        style={{
+                            cursor: 'pointer',
+                            padding: '12px',
+                            marginTop: '16px',
+                            borderColor: '#646CFE',
+                        }}
+                    >
+                        Cerrar
+                    </button>
                 </div>
             )}
         </>
