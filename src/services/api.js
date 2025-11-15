@@ -111,9 +111,6 @@ export const api = {
     },
 
     async createPost(postData) {
-        console.log('req.files:', req.files);
-        console.log('req.body:', req.body);
-        console.log('req.user:', req.user);
         // Log de los datos que vamos a enviar
         console.log('Datos del post a enviar:', {
             caption: postData.caption,
