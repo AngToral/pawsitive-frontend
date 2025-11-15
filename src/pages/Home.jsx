@@ -380,7 +380,9 @@ export default function Home() {
                     border: 'none',
                     fontSize: '24px',
                     cursor: 'pointer',
-                    padding: '16px'
+                    padding: '16px',
+                    paddingRight: '22px',
+                    paddingLeft: '22px'
                 }}
             >
                 🐾
@@ -395,7 +397,8 @@ export default function Home() {
                         backgroundColor: '#1C1C1C',
                         padding: '15px',
                         borderRadius: '8px',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                        gap: '16px'
                     }}
                 >
                     <p>{fact}</p>
