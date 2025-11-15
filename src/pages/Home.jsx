@@ -380,7 +380,7 @@ export default function Home() {
                     border: 'none',
                     fontSize: '24px',
                     cursor: 'pointer',
-                    padding: '40px'
+                    padding: '16px'
                 }}
             >
                 🐾
