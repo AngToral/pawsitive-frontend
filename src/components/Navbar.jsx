@@ -35,7 +35,7 @@ export default function Navbar() {
     ]
 
     return (
-        <nav className="fixed bottom-0 left-0 w-full bg-[#1c1c1c] border-t border-gray-600 py-3 md:top-0 md:left-0 md:w-64 md:h-screen md:border-r md:border-t-0 md:py-0">
+        <nav className="fixed bottom-0 left-0 w-full bg-[#1c1c1c] border-t border-gray-600 py-3 z-50 md:top-0 md:left-0 md:w-64 md:h-screen md:border-r md:border-t-0 md:py-0">
             <div className="flex flex-row justify-around items-center md:flex-col md:justify-start md:h-full md:p-4">
                 <Link to="/profile" className="flex items-center justify-center px-3 py-2 text-base rounded-lg transition-colors hover:bg-gray-100 flex-1 md:flex-initial md:w-full md:justify-start">
                     {user?.profilePicture ? (
