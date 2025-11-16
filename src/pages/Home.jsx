@@ -371,45 +371,19 @@ export default function Home() {
             </div>
             <button
                 onClick={getCatFact}
-                style={{
-                    position: 'fixed',
-                    bottom: '20px',
-                    right: '20px',
-                    backgroundColor: '#646CFE',
-                    borderRadius: '50%',
-                    border: 'none',
-                    fontSize: '24px',
-                    cursor: 'pointer',
-                    padding: '16px',
-                    paddingRight: '22px',
-                    paddingLeft: '22px'
-                }}
+                className="fixed bottom-20 md:bottom-5 right-5 bg-[#646CFE] rounded-full border-none text-2xl cursor-pointer p-4 pr-[22px] pl-[22px]"
             >
                 🐾
             </button>
 
             {showPopup && (
                 <div
-                    style={{
-                        position: 'fixed',
-                        bottom: '100px',
-                        right: '20px',
-                        backgroundColor: '#1C1C1C',
-                        padding: '15px',
-                        borderRadius: '8px',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                        gap: '16px'
-                    }}
+                    className="fixed bottom-40 right-5 bg-[#1C1C1C] p-4 rounded-lg shadow-lg gap-4"
                 >
                     <p>{fact}</p>
                     <button
                         onClick={() => setShowPopup(false)}
-                        style={{
-                            cursor: 'pointer',
-                            padding: '12px',
-                            marginTop: '16px',
-                            borderColor: '#646CFE',
-                        }}
+                        className="cursor-pointer p-3 mt-4 border border-[#646CFE]"
                     >
                         Cerrar
                     </button>
