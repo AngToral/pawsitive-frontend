@@ -177,10 +177,10 @@ export default function ProfilePage() {
     return (
         <div className="min-h-screen">
             {/* Header del perfil */}
-            <div className="max-w-4xl mx-auto px-4 py-8">
-                <div className="flex items-start space-x-8">
+            <div className="w-full max-w-4xl mx-auto px-4 py-8">
+                <div className="flex flex-col sm:flex-row items-start sm:items-start space-y-4 sm:space-y-0 sm:space-x-8">
                     {/* Foto de perfil */}
-                    <div className="flex-shrink-0">
+                    <div className="flex-shrink-0 mx-auto sm:mx-0">
                         {profileUser?.profilePicture && (
                             <img
                                 src={`${profileUser.profilePicture}?${new Date().getTime()}`}
@@ -198,8 +198,8 @@ export default function ProfilePage() {
                     </div>
 
                     {/* Información del perfil */}
-                    <div className="flex-1">
-                        <div className="flex items-center space-x-8 mb-4">
+                    <div className="flex-1 w-full sm:w-auto">
+                        <div className="flex flex-col sm:flex-row items-center sm:items-center space-y-4 sm:space-y-0 sm:space-x-8 mb-4">
                             <div className="flex flex-col space-x-4">
                                 <h1 className="text-2xl font-bold">{profileUser.fullName}</h1>
                                 <p>{profileUser.username}</p>
@@ -230,7 +230,7 @@ export default function ProfilePage() {
                             )}
                         </div>
 
-                        <div className="flex space-x-8 mb-4">
+                        <div className="flex justify-center sm:justify-start space-x-8 mb-4">
                             <div>
                                 <span className="font-bold">{posts.length}</span>
                                 <span className="text-gray-500 ml-1">publicaciones</span>
@@ -254,7 +254,7 @@ export default function ProfilePage() {
 
             {/* Grid de posts */}
             <div className="border-t border-gray-200 mt-8">
-                <div className="max-w-4xl mx-auto px-4 py-8">
+                <div className="w-full max-w-4xl mx-auto px-4 py-8">
                     {error && (
                         <div className="text-red-500 text-center py-4">
                             {error}
