@@ -99,7 +99,7 @@ export default function Layout({ children }) {
         <div className="flex">
             <Toaster position="top-right" />
             <Navbar />
-            <main className="flex-1 ml-64">
+            <main className="flex-1 md:ml-64 pb-20 md:pb-0 w-full">
                 {children}
             </main>
         </div>
